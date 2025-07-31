@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block maincontent %}
+  <h1>Product Cards</h1>
+  <a href="{% url 'cards-create' %}" class="btn btn-primary">Create New Card</a>
+  <hr />
+  <div class="row">
+    {% for card in cards %}
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          {# djlint:off #}
+          <img src="{{ card.image.url }}"
+               class="card-img-top"
+               alt="{{ card.title|default:'banner image' }}"
+               id="{{ card.id }}" 
+               width="200" />
+          {# djlint:on #}
+          <div class="card-body">
+            <h5 class="card-title">{{ card.title }}</h5>
+            <p class="card-text">{{ card.description }}</p>
+            <div class="row">
+              <div class="col">
+                <a href="{% url 'cards-update' card.pk %}" class="btn btn-secondary">Edit</a>
+              </div>
+              <div class="col">
+                Status:
+                {% if card.enabled %}
+                  Enabled
+                {% else %}
+                  Disabled
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% if forloop.counter|divisibleby:2 and not forloop.last %}
+        {# djlint:off #}
+      </div>
+      <div class="row">
+        {# djlint:on #}
+      {% endif %}
+    {% empty %}
+      <div class="col-12">
+        <p>No banners available.</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock maincontent %}

@@ -1,0 +1,10 @@
+Hello {{ user.first_name }},
+
+You're receiving this email because you contacted us. Here's your magic link to access your account:
+
+{{ protocol }}://{{ domain }}/magic-link/{{ uid }}/{{ token }}/
+
+This link can be used once and will expire in 24 hours.
+
+Thanks,
+The Team

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block maincontent %}
+  <div class="mt-4">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">{{ title }}</h2>
+      </div>
+      <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          <!-- Read-only user information section -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input type="text"
+                       class="form-control bg-light"
+                       value="{{ form.username.initial }}"
+                       readonly>
+                <label>Username</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input type="email"
+                       class="form-control bg-light"
+                       value="{{ form.email.initial }}"
+                       readonly>
+                <label>Email</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input type="text"
+                       class="form-control bg-light"
+                       value="{{ form.first_contact_display.initial }}"
+                       readonly>
+                <label>First Contact</label>
+              </div>
+            </div>
+          </div>
+          <!-- Editable fields section -->
+          <div class="row g-3">
+            {% for field in form %}
+              {% if field.name != 'username' and field.name != 'email' and field.name != 'first_contact_display' %}
+                <div class="col-md-6">
+                  {% if field.field.widget.input_type == "checkbox" %}
+                    <div class="form-check form-switch mb-3">
+                      {{ field }}
+                      <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text|safe }}</small>{% endif %}
+                      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% else %}
+                    <div class="form-floating mb-3">
+                      {{ field }}
+                      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text|safe }}</small>{% endif %}
+                      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'customers-list' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i> Back to List
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Appointments Section -->
+    <div class="card mt-4">
+      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">Appointments</h3>
+      </div>
+      <div class="card-body">
+        <!-- Add New Appointment Form -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Add New Appointment</h4>
+          </div>
+          <form method="post" action="{% url 'customers-update' object.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="create_appointment" value="1">
+            <div class="row g-3">
+              {% for field in appointment_form %}
+                {% if field.name != 'customer' %}
+                  <!-- Exclude customer field -->
+                  {% if field.field.widget.input_type == "checkbox" %}
+                    <div class="col-md-3 d-flex align-items-center">
+                      <div class="form-check form-switch me-4">
+                        {{ field }}
+                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text|safe }}</small>{% endif %}
+                        {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                      </div>
+                    </div>
+                  {% else %}
+                    <div class="col-md-6">
+                      <div class="form-floating mb-3">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+                        {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              <div class="col-12">
+                <div class="d-flex justify-content-start">
+                  <button type="submit" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-1"></i> Add Appointment
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <!-- Appointments List -->
+        <div class="mt-4">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Notes</th>
+                  <th>Follow Up</th>
+                  <th>Invoiced</th>
+                  <th>Paid</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for appointment in appointments %}
+                  <tr>
+                    <td>{{ appointment.date|date:"DATETIME_FORMAT" }}</td>
+                    <td>{{ appointment.kp_notes|truncatechars:35 }}</td>
+                    <td>{{ appointment.fu_notes|truncatechars:35 }}</td>
+                    <td>
+                      {% if appointment.invoiced %}
+                        <span class="badge bg-success">Yes</span>
+                      {% else %}
+                        <span class="badge bg-warning text-dark">No</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if appointment.paid %}
+                        <span class="badge bg-success">Yes</span>
+                      {% else %}
+                        <span class="badge bg-warning text-dark">No</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex">
+                        <a href="{% url 'appointment-update' appointment.id %}"
+                           class="btn btn-sm btn-outline-primary me-2"
+                           title="Edit Appointment">
+                          <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'appointment-delete' appointment.id %}"
+                           class="btn btn-sm btn-outline-danger"
+                           title="Delete Appointment">
+                          <i class="bi bi-trash"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center text-muted py-3">No appointments found</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock maincontent %}

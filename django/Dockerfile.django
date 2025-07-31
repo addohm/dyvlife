@@ -1,0 +1,48 @@
+FROM python:3.13.1-alpine3.21
+
+# Set the project port to run on
+ENV APP_PORT=8000
+
+# Prevents django from writing unnecessary files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Set an environment variable to unbuffer Python output, aiding in logging and debugging
+ENV PYTHONBUFFERED=1
+
+# Make the home directory if it does not exist, create the user, and assign ownership to that user
+RUN addgroup -g 1000 django && \
+    adduser -u 1000 -h /project -S django -G django && \
+    addgroup -g 1001 nginx && \
+    adduser -u 1001 -h /var/lib/nginx -S nginx -G nginx && \
+    adduser django nginx && \
+    mkdir -p /project/staticfiles /project/mediafiles && \
+    chown -R django:django /project && \
+    chmod -R 775 /project/staticfiles /project/mediafiles
+
+# Update apk and install psycopg2 and pillow dependencies
+RUN apk update && \
+    apk add --no-cache \
+    postgresql-dev \
+    zlib-dev \
+    jpeg-dev
+
+# Upgrade pip to ensure we have the latest version for installing dependencies
+RUN pip install --no-cache-dir --upgrade pip
+
+# Set the working directory within the container to /project for any subsequent commands
+WORKDIR /project
+
+# Copy the entire current directory contents into the container at /project
+COPY --chown=django:django . .
+
+# Give the entrypoint script executable permissions
+RUN chmod +x entrypoint.sh
+
+# Install dependencies from the requirements.txt file to ensure our Python environment is>
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Inform Docker that the container listens on the specified network port at runtime
+EXPOSE ${APP_PORT}
+
+# Start the application using gunicorn
+ENTRYPOINT [ "/project/entrypoint.sh" ]

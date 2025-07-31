@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block maincontent %}
+  <h1>Update Blurb customer</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{% url 'customers-list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock maincontent %}
+{% block scripts %}
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const imageInput = document.getElementById('id_image');
+    if (imageInput) {
+      imageInput.addEventListener('change', function (event) {
+      const [file] = event.target.files;
+      const preview = document.getElementById('image-preview');
+      if (file && preview) {
+        preview.src = URL.createObjectURL(file);
+      }
+    });
+    }
+  });
+  </script>
+{% endblock scripts %}

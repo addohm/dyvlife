@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block maincontent %}
+  <div class="container mt-4">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">
+          <i class="bi bi-calendar-event me-2"></i>
+          Update Appointment for {{ object.customer.user.get_full_name|default:object.customer.user.username }}
+        </h2>
+      </div>
+      <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+          {% csrf_token %}
+          <!-- Display non-field errors -->
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          <!-- Main form fields -->
+          <div class="row g-3">
+            <!-- Date Field -->
+            <div class="col-md-6">
+              <div class="form-floating mb-3">
+                {{ form.date }}
+                <label for="{{ form.date.id_for_label }}">Appointment Date & Time</label>
+                {% for error in form.date.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <!-- Notes Field -->
+            <div class="col-12">
+              <div class="form-floating mb-3">
+                {{ form.notes }}
+                <label for="{{ form.notes.id_for_label }}">Notes</label>
+                {% for error in form.notes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <!-- Status Toggles -->
+            <div class="col-md-6">
+              <div class="form-check form-switch mb-3">
+                {{ form.invoiced }}
+                <label class="form-check-label" for="{{ form.invoiced.id_for_label }}">Invoiced</label>
+                <small class="form-text text-muted d-block">Mark when invoice has been sent</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch mb-3">
+                {{ form.paid }}
+                <label class="form-check-label" for="{{ form.paid.id_for_label }}">Paid</label>
+                <small class="form-text text-muted d-block">Mark when payment is received</small>
+              </div>
+            </div>
+          </div>
+          <!-- Form actions -->
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'customers-update' object.customer.pk %}"
+               class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i> Back to Customer
+            </a>
+            <div>
+              <a href="{% url 'appointment-delete' object.pk %}"
+                 class="btn btn-outline-danger me-2">
+                <i class="bi bi-trash me-1"></i> Delete
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i> Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% comment %} <!-- Appointment History Section -->
+        <div class="card mt-4">
+          <div class="card-header bg-info text-white">
+            <h3 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i>
+            Appointment History
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Modified At</th>
+                <th>Changed By</th>
+                <th>Field</th>
+                <th>From</th>
+                <th>To</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- You would populate this with your audit log/history data -->
+              <tr>
+                <td colspan="5" class="text-center text-muted">History tracking coming soon</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+</div> {% endcomment %}
+</div>
+{% endblock maincontent %}
+{% block scripts %}
+  <!-- Initialize datetime picker -->
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize flatpickr for datetime input
+    flatpickr('#{{ form.date.id_for_label }}', {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        minDate: "today"
+    });
+});
+  </script>
+{% endblock scripts %}

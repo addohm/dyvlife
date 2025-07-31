@@ -1,0 +1,19 @@
+<div class="col-md">
+  {% for banner in banners %}
+    {% if banner.enabled %}
+      <div class="d-flex justify-content-center align-items-center">
+        {% if banner.image %}
+          <img class="img-fluid rounded"
+               src="{{ banner.image.url }}"
+               alt="{{ banner.title|default:'Banner image' }}"
+               width="600"
+               height="300" />
+        {% endif %}
+      </div>
+      {% if banner.title %}<h1 class="display-6">{{ banner.title }}</h1>{% endif %}
+      <blockquote class="blockquote">
+        {% if banner.message %}<p>{{ banner.message }}</p>{% endif %}
+      </blockquote>
+    {% endif %}
+  {% endfor %}
+</div>

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block maincontent %}
+  <h1>Create New Blurb Banner</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a href="{% url 'banners-list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock maincontent %}
