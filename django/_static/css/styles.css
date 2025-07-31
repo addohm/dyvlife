@@ -42,6 +42,7 @@ body {
   .content {
     flex: 1;
     padding: 20px;
+    max-width: 650px;
   }
   
   @media (max-width: 992px) {

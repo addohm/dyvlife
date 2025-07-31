@@ -1,0 +1,6 @@
+# Docker stuff
+Dockerfile.nginx
+docker-compose.*
+
+# VS Code
+.vscode
