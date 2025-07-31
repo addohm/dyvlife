@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block maincontent %}
   <h1>Product Cards</h1>
-  <a href="{% url 'cards-create' %}" class="btn btn-primary">Create New Card</a>
+  <a href="{% url 'cards-create' %}" class="btn btn-light brand-color-bg text-white">Create New Card</a>
   <hr />
   <div class="row">
     {% for card in cards %}
@@ -22,12 +22,14 @@
                 <a href="{% url 'cards-update' card.pk %}" class="btn btn-secondary">Edit</a>
               </div>
               <div class="col">
+                <div class="row justify-content-end p-1">
                 Status:
                 {% if card.enabled %}
                   Enabled
                 {% else %}
                   Disabled
                 {% endif %}
+                </div>
               </div>
             </div>
           </div>

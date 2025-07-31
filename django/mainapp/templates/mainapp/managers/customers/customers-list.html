@@ -2,7 +2,7 @@
 {% block maincontent %}
   <div class="mt-4">
     <div class="card">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <div class="card-header brand-color-bg text-white d-flex justify-content-between align-items-center">
         <h2 class="mb-0">{{ title }}</h2>
         <a href="{% url 'customers-list' %}" class="btn btn-light btn-sm">
           <i class="bi bi-arrow-repeat"></i> Refresh
@@ -13,8 +13,8 @@
           <table class="table table-hover table-striped">
             <thead class="table-light">
               <tr>
-                <th>Username</th>
-                <th>Email</th>
+                <th>Name</th>
+                <th>Email (Username)</th>
                 <th>First Contact</th>
                 <th>Interest</th>
                 <th>Status</th>
@@ -24,7 +24,7 @@
             <tbody>
               {% for customer in customers %}
                 <tr>
-                  <td>{{ customer.user.username }}</td>
+                  <td>{{ customer.user.get_full_name|default:customer.user.username }}</td>
                   <td>{{ customer.user.email }}</td>
                   <td>{{ customer.first_contact|date:"Y-m-d H:i" }}</td>
                   <td>{{ customer.interest }}</td>

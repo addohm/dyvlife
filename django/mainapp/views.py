@@ -9,7 +9,7 @@ from django.contrib.auth import login
 from django.http import JsonResponse
 
 from .models import Contact, Banner, Card, CustomerProfile, Appointment
-from .forms import ContactForm, LoginForm, CustomerUpdateForm, AppointmentForm
+from .forms import ContactForm, LoginForm, CustomerUpdateForm, AppointmentForm, BannerCreateForm, BannerUpdateForm, CardCreateForm, CardUpdateForm
 from .utils import enqueue_email
 
 # ======================
@@ -331,18 +331,16 @@ class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, Lis
     template_name = 'mainapp/managers/banners/banners-list.html'
     context_object_name = 'banners'
 
-
 class BannerCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
     model = Banner
+    form_class = BannerCreateForm  # Use your custom form
     template_name = 'mainapp/managers/banners/banners-create.html'
-    fields = ['title', 'message', 'image', 'enabled']
     success_url = reverse_lazy('banners-list')
-
 
 class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Banner
+    form_class = BannerUpdateForm  # Use your custom form
     template_name = 'mainapp/managers/banners/banners-update.html'
-    fields = ['title', 'message', 'image', 'enabled']
     success_url = reverse_lazy('banners-list')
 
 
@@ -358,13 +356,13 @@ class CardListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListV
 
 class CardCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
     model = Card
+    form_class = CardCreateForm  # Use your custom form
     template_name = 'mainapp/managers/cards/cards-create.html'
-    fields = ['title', 'description', 'image', 'enabled']
     success_url = reverse_lazy('cards-list')
 
 
 class CardUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Card
+    form_class = CardUpdateForm  # Use your custom form
     template_name = 'mainapp/managers/cards/cards-update.html'
-    fields = ['title', 'description', 'image', 'enabled']
     success_url = reverse_lazy('cards-list')

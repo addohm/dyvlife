@@ -26,3 +26,14 @@ function topFunction() {
     behavior: 'smooth'
   });
 }
+
+function handleDropdownClick(event) {
+  if (event.target.classList.contains('dropdown-item')) {
+    setTimeout(() => {
+      const navbar = document.querySelector('.navbar-collapse');
+      if (navbar.classList.contains('show')) {
+        new bootstrap.Collapse(navbar).hide();
+      }
+    }, 50);
+  }
+}

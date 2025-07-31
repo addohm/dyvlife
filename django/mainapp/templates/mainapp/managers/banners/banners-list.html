@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block maincontent %}
   <h1>Blurb Banners</h1>
-  <a href="{% url 'banners-create' %}" class="btn btn-primary">Create New Banner</a>
+  <a href="{% url 'banners-create' %}" class="btn btn-light brand-color-bg text-white">Create New Banner</a>
   <hr />
   <div class="row">
     {% for banner in banners %}
@@ -22,12 +22,14 @@
                 <a href="{% url 'banners-update' banner.pk %}" class="btn btn-secondary">Edit</a>
               </div>
               <div class="col">
+                <div class="row justify-content-end p-1">
                 Status:
                 {% if banner.enabled %}
                   Enabled
                 {% else %}
                   Disabled
                 {% endif %}
+                </div>
               </div>
             </div>
           </div>

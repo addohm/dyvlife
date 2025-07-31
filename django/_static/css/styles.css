@@ -106,6 +106,10 @@ footer > .container {
   color: rgba(150, 111, 66);
 }
 
+.brand-color-bg {
+  background-color: rgba(150, 111, 66);
+}
+
 #backToTopBtn {
   border: 0px;
   display: none;

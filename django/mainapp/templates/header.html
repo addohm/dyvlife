@@ -36,9 +36,14 @@
              data-bs-toggle="dropdown"
              aria-haspopup="true"
              aria-expanded="false">Products</a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            {% for card in cards %}<a class="dropdown-item" href="#{{ card.id }}">{{ card.title }}</a>{% endfor %}
-          </div>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink" 
+            onclick="handleDropdownClick(event)">
+          {% for card in cards %}
+            <a class="dropdown-item" href="#{{ card.id }}">
+              {{ card.title }}
+            </a>
+          {% endfor %}
+        </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'contact' %}">Contact</a>

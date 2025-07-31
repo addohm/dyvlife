@@ -1,13 +1,10 @@
 from django import forms
-from django.core.mail import EmailMessage
-from django.db import transaction
 from django.utils.timezone import now
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.html import format_html
-from decouple import config
 
-from .models import Contact, CustomerProfile, Appointment
+from .models import Contact, CustomerProfile, Appointment, Banner, Card
 from .utils import enqueue_email
 
 
@@ -116,6 +113,7 @@ class CustomerUpdateForm(forms.ModelForm):
     # Add read-only fields to display user info
     username = forms.CharField(disabled=True, required=False)
     email = forms.EmailField(disabled=True, required=False)
+    full_name = forms.CharField(disabled=True, required=False, label="Full Name")
     first_contact_display = forms.CharField(
         disabled=True,
         required=False,
@@ -139,6 +137,7 @@ class CustomerUpdateForm(forms.ModelForm):
         if self.instance and self.instance.user:
             self.fields['username'].initial = self.instance.user.username
             self.fields['email'].initial = self.instance.user.email
+            self.fields['full_name'].initial = self.instance.user.get_full_name() or self.insance.user.username
             self.fields['first_contact_display'].initial = self.instance.first_contact.strftime(
                 '%Y-%m-%d %H:%M')
 
@@ -177,3 +176,130 @@ class AppointmentForm(forms.ModelForm):
         self.fields['invoiced'].widget.attrs.update(
             {'class': 'form-check-input'})
         self.fields['paid'].widget.attrs.update({'class': 'form-check-input'})
+
+class BannerCreateForm(forms.ModelForm):
+    class Meta:
+        model = Banner
+        fields = ['title', 'message', 'image', 'enabled']
+        labels = {
+            'title': 'Banner Title',
+            'message': 'Banner Message',
+            'enabled': 'Enable Banner'
+        }
+        help_texts = {
+            'message': 'This text will be displayed to users',
+            'enabled': 'Uncheck to temporarily disable this banner'
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if field != 'enabled':
+                self.fields[field].widget.attrs.update({'class': 'form-control'})
+            else:
+                self.fields[field].widget.attrs.update({'class': 'form-check-input'})
+                
+            # Add aria-describedby for accessibility if help text exists
+            if self.fields[field].help_text:
+                self.fields[field].widget.attrs.update({
+                    'aria-describedby': f'help_{field}'
+                })
+
+
+class BannerUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Banner
+        fields = ['title', 'message', 'image', 'enabled']
+        labels = {
+            'title': 'Banner Title',
+            'message': 'Banner Message',
+            'enabled': 'Enable Banner'
+        }
+        help_texts = {
+            'message': 'This text will be displayed on the Banner',
+            'enabled': 'Uncheck to temporarily hide this Banner'
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if field != 'enabled':
+                self.fields[field].widget.attrs.update({'class': 'form-control'})
+            else:
+                self.fields[field].widget.attrs.update({'class': 'form-check-input'})
+                
+            # Add placeholders
+            if field == 'title':
+                self.fields[field].widget.attrs['placeholder'] = 'Enter Banner title'
+            elif field == 'description':
+                self.fields[field].widget.attrs['placeholder'] = 'Enter Banner description'
+            
+            # Accessibility improvements
+            if self.fields[field].help_text:
+                self.fields[field].widget.attrs.update({
+                    'aria-describedby': f'help_{field}'
+                })
+
+
+class CardCreateForm(forms.ModelForm):
+    class Meta:
+        model = Card
+        fields = ['title', 'description', 'image', 'enabled']
+        labels = {
+            'title': 'Product Title',
+            'description': 'Product Description',
+            'enabled': 'Enable Product Card'
+        }
+        help_texts = {
+            'description': 'This text will be displayed to users',
+            'enabled': 'Uncheck to temporarily disable this card'
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if field != 'enabled':
+                self.fields[field].widget.attrs.update({'class': 'form-control'})
+            else:
+                self.fields[field].widget.attrs.update({'class': 'form-check-input'})
+                
+            # Add aria-describedby for accessibility if help text exists
+            if self.fields[field].help_text:
+                self.fields[field].widget.attrs.update({
+                    'aria-describedby': f'help_{field}'
+                })
+
+
+class CardUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Card
+        fields = ['title', 'description', 'image', 'enabled']
+        labels = {
+            'title': 'Card Title',
+            'description': 'Card Description',
+            'enabled': 'Enable Card'
+        }
+        help_texts = {
+            'description': 'This text will be displayed on the card',
+            'enabled': 'Uncheck to temporarily hide this card'
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            if field != 'enabled':
+                self.fields[field].widget.attrs.update({'class': 'form-control'})
+            else:
+                self.fields[field].widget.attrs.update({'class': 'form-check-input'})
+                
+            # Add placeholders
+            if field == 'title':
+                self.fields[field].widget.attrs['placeholder'] = 'Enter card title'
+            elif field == 'description':
+                self.fields[field].widget.attrs['placeholder'] = 'Enter card description'
+            
+            # Accessibility improvements
+            if self.fields[field].help_text:
+                self.fields[field].widget.attrs.update({
+                    'aria-describedby': f'help_{field}'
+                })

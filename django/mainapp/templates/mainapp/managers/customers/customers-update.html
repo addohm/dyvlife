@@ -2,7 +2,7 @@
 {% block maincontent %}
   <div class="mt-4">
     <div class="card">
-      <div class="card-header bg-primary text-white">
+      <div class="card-header brand-color-bg text-white">
         <h2 class="mb-0">{{ title }}</h2>
       </div>
       <div class="card-body">
@@ -19,9 +19,9 @@
               <div class="form-floating">
                 <input type="text"
                        class="form-control bg-light"
-                       value="{{ form.username.initial }}"
+                       value="{{ form.full_name.initial }}"
                        readonly>
-                <label>Username</label>
+                <label>Full Name</label>
               </div>
             </div>
             <div class="col-md-4">
@@ -30,7 +30,7 @@
                        class="form-control bg-light"
                        value="{{ form.email.initial }}"
                        readonly>
-                <label>Email</label>
+                <label>Email (Username)</label>
               </div>
             </div>
             <div class="col-md-4">
@@ -46,7 +46,7 @@
           <!-- Editable fields section -->
           <div class="row g-3">
             {% for field in form %}
-              {% if field.name != 'username' and field.name != 'email' and field.name != 'first_contact_display' %}
+              {% if field.name != 'username' and field.name != 'email' and field.name != 'first_contact_display' and field.name != 'full_name' %}
                 <div class="col-md-6">
                   {% if field.field.widget.input_type == "checkbox" %}
                     <div class="form-check form-switch mb-3">
@@ -71,7 +71,7 @@
             <a href="{% url 'customers-list' %}" class="btn btn-outline-secondary">
               <i class="bi bi-arrow-left me-1"></i> Back to List
             </a>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-light brand-color-bg text-white">
               <i class="bi bi-save me-1"></i> Save Changes
             </button>
           </div>
@@ -80,7 +80,7 @@
     </div>
     <!-- Appointments Section -->
     <div class="card mt-4">
-      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+      <div class="card-header brand-color-bg text-white d-flex justify-content-between align-items-center">
         <h3 class="mb-0">Appointments</h3>
       </div>
       <div class="card-body">
