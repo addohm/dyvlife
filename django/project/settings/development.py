@@ -117,7 +117,7 @@ STATICFILES_DIRS = [
 
 # STATIC_ROOT: This is the absolute path to a directory where Django's collectstatic tool
 # will gather any static files referenced in our templates. Once collected, these can then be uploaded as a group to wherever the files are to be hosted.
-STATIC_ROOT = "./staticfiles"
+STATIC_ROOT = "./django/staticfiles"
 
 # STATIC_URL: This is the base URL location from which static files will be served,
 # for example on a CDN.
@@ -129,7 +129,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
 
 # MEDIA_ROOT: This is the absolute path to a directory where Django will gather any user uploaded images and files
 # ex: /var/www/files/media
-MEDIA_ROOT = "./mediafiles"
+MEDIA_ROOT = "./django/mediafiles"
 
 # MEDIA_URL: This is the base URL location from which media files will be served,
 # for example on a CDN.

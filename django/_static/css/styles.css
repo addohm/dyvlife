@@ -1,5 +1,10 @@
 html {
   scroll-padding-top: 70px; /* height of your fixed header */
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
 }
 
 body {
@@ -9,63 +14,46 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  position: relative; /* Ensure the body is a positioning context */
-  padding-bottom: 50px; /* Adjust this to match footer height */
+  position: relative;
   background-color: rgb(242, 242, 242);
 }
 
-.brand-color {
-  color: rgba(150, 111, 66); /* Orange with 80% opacity */
+/* Remove duplicate .wrapper styles (body already has these properties) */
+.main-content {
+  padding-top: 56px; /* Space for fixed navbar */
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
-/* Custom styles for the sidebar layout */
-  .wrapper {
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
-    padding-top: 56px; /* Height of your navbar */
-  }
-  
-  .main-content {
-    padding-top: 56px; /* Default Bootstrap navbar height */
-    display: flex;
-    flex: 1;
-  }
-  
-  .sidebar {
-    width: 250px;
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-right: 1px solid #dee2e6;
-  }
-  
-  .content {
-    flex: 1;
-    padding: 20px;
-    max-width: 650px;
-  }
-  
-  @media (max-width: 992px) {
-    .wrapper {
-      padding-top: 0; /* Reset for mobile if needed */
-    }
-    .main-content {
-      flex-direction: column;
-    }
-    .sidebar {
-      width: 100%;
-      border-right: none;
-      border-bottom: 1px solid #dee2e6;
-    }
-  }
+.sidebar {
+  width: 250px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-right: 1px solid #dee2e6;
+}
 
+.content {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .main-content {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+  }
+}
 
 .bg-body-tertiary {
-  background-color: rgb(
-    242,
-    242,
-    242
-  ) !important; /* Ensure the background color matches */
+  background-color: rgb(242, 242, 242) !important;
 }
 
 /* Navbar styling */
@@ -73,26 +61,49 @@ body {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1000; /* Ensure the navbar is above other elements */
-  /* background-color: rgb(242, 242,2 42); Match the navbar background color */
+  z-index: 1200;
   opacity: 0.85;
+}
+
+.navbar > .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 /* Footer styling */
 footer {
-  height: 60px; /* Adjust if necessary */
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  z-index: 2; /* Ensure the footer is above the carousel */
-  background-color: rgb(
-    242,
-    242,
-    242
-  ); /* Optional: Match the footer background color with the navbar */
-  color: white;
+  background-color: rgb(242, 242, 242);
+  color: #000;
   text-align: center;
-  padding: 10px 0;
+  padding: 15px 0;
+  margin-top: auto;
+  width: 100%;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+footer > .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-color {
+  color: rgba(150, 111, 66);
 }
 
 #backToTopBtn {
@@ -104,13 +115,13 @@ footer {
   z-index: 99;
   width: 40px;
   height: 40px;
-  opacity: 0; /* Start fully transparent */
-  transition: opacity 0.3s ease-in-out; /* Smooth fade transition */
-  color: rgba(150, 111, 66); /* Orange with 80% opacity */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  color: rgba(150, 111, 66);
 }
 
 #backToTopBtn.show {
-  opacity: 1; /* Fully visible when 'show' class is added */
+  opacity: 1;
 }
 
 @media (max-width: 576px) {
@@ -120,19 +131,29 @@ footer {
     width: 30px;
     height: 30px;
   }
+  
+  footer > .container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  footer .col-md-4 {
+    width: 100%;
+    justify-content: center !important;
+  }
 }
 
 .footer-link {
   text-decoration: none;
-  color: transparent
+  color: transparent;
 }
 
-.bi .bi-linkedin {
+.bi.bi-linkedin {
   text-decoration: none;
 }
 
 .form-floating > .form-control:not(:placeholder-shown) ~ label {
-    opacity: .8;
+  opacity: .8;
 }
 
 .form-floating > .form-select ~ label {
