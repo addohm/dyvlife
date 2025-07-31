@@ -10,7 +10,7 @@ media/
 staticfiles/
 
 # Docker
-docker-compose.yaml
+docker-compose*.yaml
 
 # Migrations
 */migrations/*.py
