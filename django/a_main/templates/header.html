@@ -36,7 +36,9 @@
           <div class="dropdown-menu"
                aria-labelledby="navbarDropdownMenuLink"
                onclick="handleDropdownClick(event)">
-            {% for card in cards %}<a class="dropdown-item" href="#{{ card.id }}">{{ card.title }}</a>{% endfor %}
+            {% for card in cards %}
+              <a class="dropdown-item" href="{% url 'index' %}#{{ card.id }}">{{ card.title }}</a>
+            {% endfor %}
           </div>
         </li>
         <li class="nav-item">

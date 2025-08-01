@@ -23,6 +23,8 @@ class UserGroupContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['banners'] = Banner.objects.all()
+        context['cards'] = Card.objects.all()
         user = self.request.user
 
         if user.is_authenticated:
@@ -59,7 +61,7 @@ class ManagerOrSuperuserRequiredMixin(UserPassesTestMixin):
 # ======================
 # AUTH VIEWS
 # ======================
-class MagicLinkLoginView(View):
+class MagicLinkLoginView(UserGroupContextMixin, View):
     def get(self, request, token):
         from .models import CustomerProfile
         try:
@@ -77,7 +79,7 @@ class MagicLinkLoginView(View):
             return redirect('login')
 
 
-class CustomLoginView(LoginView):
+class CustomLoginView(UserGroupContextMixin, LoginView):
     form_class = LoginForm
     template_name = 'a_main/auth/login.html'
     redirect_authenticated_user = True
@@ -112,12 +114,6 @@ class FailedPermissionsView(UserGroupContextMixin, TemplateView):
 class IndexView(UserGroupContextMixin, TemplateView):
     template_name = "a_main/index.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['banners'] = Banner.objects.all()
-        context['cards'] = Card.objects.all()
-        return context
-
 
 class ContactView(UserGroupContextMixin, CreateView):
     form_class = ContactForm
@@ -134,8 +130,6 @@ class ContactView(UserGroupContextMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cards'] = Card.objects.all()
-        # Pass the subject to template if needed
         context['initial_subject'] = self.request.GET.get('subject', None)
         return context
 
@@ -158,6 +152,11 @@ class PrivacyView(UserGroupContextMixin, TemplateView):
 
 class SentView(UserGroupContextMixin, TemplateView):
     template_name = "a_main/contact/message_sent.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cards'] = Card.objects.all()
+        return context
 
 
 # ======================
