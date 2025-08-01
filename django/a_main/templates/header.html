@@ -50,11 +50,11 @@
         </li>
         {% if user.is_authenticated %}
           {% if is_manager_or_superuser %}
-            {% include "mainapp/auth/admin_menu.html" %}
+            {% include "a_main/auth/admin_menu.html" %}
           {% endif %}
-          {% include "mainapp/auth/logout_menu.html" %}
+          {% include "a_main/auth/logout_menu.html" %}
         {% else %}
-          {% include "mainapp/auth/login_menu.html" %}
+          {% include "a_main/auth/login_menu.html" %}
         {% endif %}
       </ul>
     </div>

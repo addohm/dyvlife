@@ -79,7 +79,7 @@ class MagicLinkLoginView(View):
 
 class CustomLoginView(LoginView):
     form_class = LoginForm
-    template_name = 'mainapp/auth/login.html'
+    template_name = 'a_main/auth/login.html'
     redirect_authenticated_user = True
 
     def get_success_url(self):
@@ -103,14 +103,14 @@ class CustomLoginView(LoginView):
 
 
 class FailedPermissionsView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/auth/no_permissions.html"
+    template_name = "a_main/auth/no_permissions.html"
 
 
 # ======================
 # CORE VIEWS
 # ======================
 class IndexView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/index.html"
+    template_name = "a_main/index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -121,7 +121,7 @@ class IndexView(UserGroupContextMixin, TemplateView):
 
 class ContactView(UserGroupContextMixin, CreateView):
     form_class = ContactForm
-    template_name = "mainapp/contact/contact.html"
+    template_name = "a_main/contact/contact.html"
     success_url = reverse_lazy('sent')
 
     def get_form_kwargs(self):
@@ -141,23 +141,23 @@ class ContactView(UserGroupContextMixin, CreateView):
 
 
 class AboutView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/about.html"
+    template_name = "a_main/about.html"
 
 
 class FAQView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/faq.html"
+    template_name = "a_main/faq.html"
 
 
 class TermsView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/terms.html"
+    template_name = "a_main/terms.html"
 
 
 class PrivacyView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/privacy.html"
+    template_name = "a_main/privacy.html"
 
 
 class SentView(UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/contact/message_sent.html"
+    template_name = "a_main/contact/message_sent.html"
 
 
 # ======================
@@ -165,11 +165,11 @@ class SentView(UserGroupContextMixin, TemplateView):
 # ======================
 class UsersView(UserGroupContextMixin, LoginRequiredMixin, TemplateView):
     login_url = 'login'
-    template_name = "mainapp/users/users.html"
+    template_name = "a_main/users/users.html"
 
 
 class ManagersView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, TemplateView):
-    template_name = "mainapp/managers/managers.html"
+    template_name = "a_main/managers/managers.html"
 
 
 # ======================
@@ -178,7 +178,7 @@ class ManagersView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, Templ
 class CustomersListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
     model = CustomerProfile
     paginate_by = 20
-    template_name = 'mainapp/managers/customers/customers-list.html'
+    template_name = 'a_main/managers/customers/customers-list.html'
     context_object_name = 'customers'
 
     def get_queryset(self):
@@ -260,7 +260,7 @@ class CustomersListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, 
 class CustomersUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = CustomerProfile
     form_class = CustomerUpdateForm
-    template_name = 'mainapp/managers/customers/customers-update.html'
+    template_name = 'a_main/managers/customers/customers-update.html'
     success_url = reverse_lazy('customers-list')
 
     def get_context_data(self, **kwargs):
@@ -307,7 +307,7 @@ class CustomersUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin
 class AppointmentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Appointment
     form_class = AppointmentForm
-    template_name = 'mainapp/managers/customers/appointment-update.html'
+    template_name = 'a_main/managers/customers/appointment-update.html'
 
     def get_success_url(self):
         return reverse_lazy('customers-update', kwargs={'pk': self.object.customer.pk})
@@ -320,7 +320,7 @@ class AppointmentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMix
 
 class AppointmentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, DeleteView):
     model = Appointment
-    template_name = 'mainapp/managers/customers/appointment-confirm-delete.html'
+    template_name = 'a_main/managers/customers/appointment-confirm-delete.html'
 
     def get_success_url(self):
         return reverse_lazy('customers-update', kwargs={'pk': self.object.customer.pk})
@@ -337,21 +337,21 @@ class AppointmentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMix
 class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
     model = Banner
     paginate_by = 20
-    template_name = 'mainapp/managers/banners/banners-list.html'
+    template_name = 'a_main/managers/banners/banners-list.html'
     context_object_name = 'banners'
 
 
 class BannerCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
     model = Banner
     form_class = BannerCreateForm  # Use your custom form
-    template_name = 'mainapp/managers/banners/banners-create.html'
+    template_name = 'a_main/managers/banners/banners-create.html'
     success_url = reverse_lazy('banners-list')
 
 
 class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Banner
     form_class = BannerUpdateForm  # Use your custom form
-    template_name = 'mainapp/managers/banners/banners-update.html'
+    template_name = 'a_main/managers/banners/banners-update.html'
     success_url = reverse_lazy('banners-list')
 
 
@@ -361,19 +361,19 @@ class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, U
 class CardListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
     model = Card
     paginate_by = 20
-    template_name = 'mainapp/managers/cards/cards-list.html'
+    template_name = 'a_main/managers/cards/cards-list.html'
     context_object_name = 'cards'
 
 
 class CardCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
     model = Card
     form_class = CardCreateForm  # Use your custom form
-    template_name = 'mainapp/managers/cards/cards-create.html'
+    template_name = 'a_main/managers/cards/cards-create.html'
     success_url = reverse_lazy('cards-list')
 
 
 class CardUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Card
     form_class = CardUpdateForm  # Use your custom form
-    template_name = 'mainapp/managers/cards/cards-update.html'
+    template_name = 'a_main/managers/cards/cards-update.html'
     success_url = reverse_lazy('cards-list')

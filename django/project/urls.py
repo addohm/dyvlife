@@ -8,14 +8,15 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
-    path('', include("mainapp.urls")),
+    path('', include("a_main.urls")),
 ]
 
 # Serving the media files in development mode and enabling ddtb
 
 DEBUG_MODE = settings.DEBUG and "test" not in sys.argv
 if DEBUG_MODE:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
     urlpatterns += debug_toolbar_urls()
 else:
     urlpatterns += staticfiles_urlpatterns()
