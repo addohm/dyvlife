@@ -5,7 +5,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.utils.html import format_html
 
 from .models import Contact, CustomerProfile, Appointment, Banner, Card
-from .utils import enqueue_email
+
+from project.utils import enqueue_email
 
 
 class LoginForm(AuthenticationForm):
@@ -20,17 +21,6 @@ class LoginForm(AuthenticationForm):
 
 
 class ContactForm(forms.ModelForm):
-    SUBJECT_CHOICES = [
-        ('Executive Coaching', 'Executive Coaching'),
-        ('HR Advisory & Consultation', 'HR Advisory & Consultation'),
-    ]
-
-    subject = forms.ChoiceField(
-        choices=SUBJECT_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label='Subject'
-    )
-
     class Meta:
         model = Contact
         fields = ('name', 'email', 'subject', 'message')
@@ -38,25 +28,35 @@ class ContactForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Your full name'
+                'placeholder': 'Your full name',
+                'rows': 1,
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'your@email.com'
+                'placeholder': 'your@email.com',
+                'rows': 1,
+            }),
+            'subject': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Reason for your inquiry...',
+                'rows': 1,
             }),
             'message': forms.Textarea(attrs={
                 'class': 'form-control',
                 'placeholder': 'Your message...',
-                'rows': 4
+                'rows': 6,
             }),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, subject=None, **kwargs):
         super().__init__(*args, **kwargs)
         # Add form-control class to all fields automatically
         for field_name, field in self.fields.items():
             if 'class' not in field.widget.attrs:
                 field.widget.attrs['class'] = 'form-control'
+
+        if subject:
+            self.fields['subject'].initial = subject
 
     def save(self, commit=True):
         instance = super().save(commit=commit)

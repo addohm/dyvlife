@@ -8,6 +8,7 @@ appname = "mainapp"
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('contact/', ContactView.as_view(), name='contact'),
+    path('about/', AboutView.as_view(), name='about'),
     path('faq/', FAQView.as_view(), name='faq'),
     path('terms/', TermsView.as_view(), name='terms'),
     path('privacy/', PrivacyView.as_view(), name='privacy'),

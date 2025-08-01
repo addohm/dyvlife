@@ -10,7 +10,8 @@ from django.http import JsonResponse
 
 from .models import Contact, Banner, Card, CustomerProfile, Appointment
 from .forms import ContactForm, LoginForm, CustomerUpdateForm, AppointmentForm, BannerCreateForm, BannerUpdateForm, CardCreateForm, CardUpdateForm
-from .utils import enqueue_email
+
+from project.utils import enqueue_email
 
 # ======================
 # CUSTOM MIXINS
@@ -108,10 +109,8 @@ class FailedPermissionsView(UserGroupContextMixin, TemplateView):
 # ======================
 # CORE VIEWS
 # ======================
-class IndexView(UserGroupContextMixin, CreateView):
-    form_class = ContactForm
+class IndexView(UserGroupContextMixin, TemplateView):
     template_name = "mainapp/index.html"
-    success_url = 'sent'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -123,32 +122,42 @@ class IndexView(UserGroupContextMixin, CreateView):
 class ContactView(UserGroupContextMixin, CreateView):
     form_class = ContactForm
     template_name = "mainapp/contact/contact.html"
-    success_url = '/sent/'
+    success_url = reverse_lazy('sent')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Get the subject from URL parameters
+        subject = self.request.GET.get('subject', None)
+        if subject:
+            kwargs['subject'] = subject
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['cards'] = Card.objects.all()
+        # Pass the subject to template if needed
+        context['initial_subject'] = self.request.GET.get('subject', None)
         return context
+
+
+class AboutView(UserGroupContextMixin, TemplateView):
+    template_name = "mainapp/about.html"
 
 
 class FAQView(UserGroupContextMixin, TemplateView):
     template_name = "mainapp/faq.html"
-    sent = Contact.objects.all()
 
 
 class TermsView(UserGroupContextMixin, TemplateView):
     template_name = "mainapp/terms.html"
-    sent = Contact.objects.all()
 
 
 class PrivacyView(UserGroupContextMixin, TemplateView):
     template_name = "mainapp/privacy.html"
-    sent = Contact.objects.all()
 
 
 class SentView(UserGroupContextMixin, TemplateView):
     template_name = "mainapp/contact/message_sent.html"
-    sent = Contact.objects.all()
 
 
 # ======================
@@ -331,11 +340,13 @@ class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, Lis
     template_name = 'mainapp/managers/banners/banners-list.html'
     context_object_name = 'banners'
 
+
 class BannerCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
     model = Banner
     form_class = BannerCreateForm  # Use your custom form
     template_name = 'mainapp/managers/banners/banners-create.html'
     success_url = reverse_lazy('banners-list')
+
 
 class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Banner

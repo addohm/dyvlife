@@ -12,7 +12,8 @@
           <div class="card-body">
             <h5 class="card-title">{{ card.title }}</h5>
             <p class="card-text">{{ card.description }}</p>
-            <a href="{% url 'contact' %}" class="card-link">Inquire now</a>
+            <a href="{% url 'contact' %}?subject=[{{ card.title }}]" class="card-link">
+              <button class="btn btn-light brand-color-bg text-white">Inquire now</button></a>
           </div>
         </div>
       </div>

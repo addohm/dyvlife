@@ -1,14 +1,13 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container">
-    <!-- Brand stays on the left (default) -->
     <a class="navbar-brand" href="{% url 'index' %}">
-      {% comment %} Your Voyage | Your Life {% endcomment %}
+      {# djlint:off #}
       <img src="{% static "images/header_brand.png" %}"
            alt="Your Brand"
            height="45">
+      {# djlint:on #}
     </a>
-    <!-- Toggler (hidden on lg screens) -->
     <button class="navbar-toggler d-lg-none"
             type="button"
             data-bs-toggle="collapse"
@@ -18,10 +17,8 @@
             aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <!-- Nav links (now right-aligned with ms-auto) -->
     <div class="collapse navbar-collapse" id="collapsibleNavId">
       <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-        <!-- Changed me-auto to ms-auto -->
         <li class="nav-item">
           <a class="nav-link active" href="{% url 'index' %}" aria-current="page">
             Home
@@ -36,20 +33,17 @@
              data-bs-toggle="dropdown"
              aria-haspopup="true"
              aria-expanded="false">Products</a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink" 
-            onclick="handleDropdownClick(event)">
-          {% for card in cards %}
-            <a class="dropdown-item" href="#{{ card.id }}">
-              {{ card.title }}
-            </a>
-          {% endfor %}
-        </div>
+          <div class="dropdown-menu"
+               aria-labelledby="navbarDropdownMenuLink"
+               onclick="handleDropdownClick(event)">
+            {% for card in cards %}<a class="dropdown-item" href="#{{ card.id }}">{{ card.title }}</a>{% endfor %}
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'contact' %}">Contact</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#about">About</a>
+          <a class="nav-link" href="{% url 'about' %}">About</a>
         </li>
         <li class="nav-item">
           <hr class="dropdown-divider">
