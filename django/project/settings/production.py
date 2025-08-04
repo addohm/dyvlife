@@ -243,3 +243,7 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
+
+STRIPE_PUBLIC_KEY = config('STRIPE_PK')
+STRIPE_SECRET_KEY = config('STRIPE_SK')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WH')
