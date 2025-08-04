@@ -1,5 +1,74 @@
 {% extends "base.html" %}
-{% load static %}
 {% block maincontent %}
-  <h1 class="display-1 text-center">FAQ Page</h1>
-{% endblock maincontent %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <!-- Header Section -->
+        <div class="text-center mb-5">
+          <h1 class="display-5 fw-bold mb-3">Frequently Asked Questions</h1>
+          {% comment %} <p class="text-muted">Effective Date: {% now "F j, Y" %}</p> {% endcomment %}
+          <div class="d-flex justify-content-center">
+            <hr style="width: 100px; border-top: 3px solid #0d6efd; opacity: 1;">
+          </div>
+        </div>
+        <!-- Privacy Content -->
+        <div>
+          {% for element in content_elements %}
+            {% if element.type == 'image' %}
+              <figure class="figure text-center my-4">
+                <img src="{{ element.media.file.url }}"
+                     class="figure-img img-fluid rounded"
+                     alt="{{ element.media.caption|default:'' }}"
+                     style="max-width: 100%;
+                            max-height: 400px;
+                            height: auto">
+                {% if element.media.caption %}
+                  <figcaption class="figure-caption mt-2 text-center">{{ element.media.caption }}</figcaption>
+                {% endif %}
+              </figure>
+            {% elif element.type == 'text' %}
+              <section class="mb-5">
+                {% if element.item.title %}
+                  <h2 class="h4 mb-3 brand-color">
+                    <i class="bi bi-patch-question me-2"></i>
+                    {{ element.item.title }}
+                  </h2>
+                {% endif %}
+                {% if element.item.description %}
+                  <div class="privacy-text ps-3">{{ element.item.description|linebreaks }}</div>
+                {% endif %}
+              </section>
+            {% endif %}
+          {% empty %}
+            <div class="alert alert-info text-center">No privacy policy available at this time.</div>
+          {% endfor %}
+          <!-- Last Updated Note -->
+          <div class="mt-5 pt-3 border-top text-muted text-center small">
+            <p>This policy may be updated periodically. Please check back for changes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .privacy-content {
+        text-align: justify;
+        hyphens: auto;
+    }
+    .privacy-text {
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+    }
+    .privacy-text p {
+        margin-bottom: 1.25rem;
+    }
+    @media (max-width: 767.98px) {
+        .privacy-content {
+            padding: 1.5rem !important;
+        }
+        .privacy-text {
+            padding-left: 0 !important;
+        }
+    }
+  </style>
+{% endblock %}

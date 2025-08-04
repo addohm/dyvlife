@@ -1,28 +1,30 @@
 <div class="row">
   {% for card in cards %}
-    {% if card.enabled %}
-      <div class="col-md-6 mb-4">
-        <div class="card h-100">
-          <img src="{{ card.image.url }}"
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        {% if card.image_url %}
+          <img src="{{ card.image_url }}"
                class="card-img-top"
                alt="{{ card.title|default:'card image' }}"
                id="{{ card.id }}"
                width="400"
                height="250" />
-          <div class="card-body">
-            <h5 class="card-title">{{ card.title }}</h5>
-            <p class="card-text">{{ card.description }}</p>
-            <a href="{% url 'contact' %}?subject=[{{ card.title }}]" class="card-link">
-              <button class="btn btn-light brand-color-bg text-white">Inquire now</button></a>
-          </div>
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ card.title }}</h5>
+          <p class="card-text">{{ card.description }}</p>
+          <a href="{% url 'contact' %}?subject=[{{ card.title }}]"
+             class="card-link">
+            <button class="btn btn-light brand-color-bg text-white">Inquire now</button>
+          </a>
         </div>
       </div>
-      {% if forloop.counter|divisibleby:2 and not forloop.last %}
-        {# djlint:off #}
+    </div>
+    {% if forloop.counter|divisibleby:2 and not forloop.last %}
+      {# djlint:off #}
       </div>
       <div class="row">
-        {# djlint:on #}
-      {% endif %}
+      {# djlint:on #}
     {% endif %}
   {% endfor %}
 </div>

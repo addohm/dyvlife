@@ -7,8 +7,8 @@
      aria-haspopup="true"
      aria-expanded="false">Admin</a>
   <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-    <a class="dropdown-item" href="{% url "banners-list" %}">Banners</a>
-    <a class="dropdown-item" href="{% url "cards-list" %}">Product Cards</a>
+    <a class="dropdown-item" href="{% url "banners" %}">Banner List</a>
+    <a class="dropdown-item" href="{% url "cards" %}">Product Card List</a>
     <a class="dropdown-item" href="{% url "customers-list" %}">Customers</a>
     {% if user.is_superuser %}
       <a class="dropdown-item" href="{% url "admin:index" %}">Admin</a>

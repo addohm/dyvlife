@@ -6,12 +6,13 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth import login
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.db.models import Prefetch
 
-from .models import Contact, Banner, Card, CustomerProfile, Appointment
-from .forms import ContactForm, LoginForm, CustomerUpdateForm, AppointmentForm, BannerCreateForm, BannerUpdateForm, CardCreateForm, CardUpdateForm
+from .models import CustomerProfile, Appointment, Content
+from .forms import *
 
-from project.utils import enqueue_email
+from .utils import enqueue_email
 
 # ======================
 # CUSTOM MIXINS
@@ -23,8 +24,17 @@ class UserGroupContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['banners'] = Banner.objects.all()
-        context['cards'] = Card.objects.all()
+        # Pass cards in, mainly for the header.  Only need title and url
+        cards = Content.objects.filter(
+            content_type='CARD',
+            enabled=True
+        ).order_by('-created_at')
+
+        context['cards'] = [
+            {'id': card.id, 'title': card.title}
+            for card in cards
+        ]
+
         user = self.request.user
 
         if user.is_authenticated:
@@ -114,6 +124,45 @@ class FailedPermissionsView(UserGroupContextMixin, TemplateView):
 class IndexView(UserGroupContextMixin, TemplateView):
     template_name = "a_main/index.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Cards are already passed into context via UserGroupContentMixin
+        # But need to override to get images and descriptions.
+        cards = Content.objects.filter(
+            content_type='CARD',
+            enabled=True
+        ).order_by('-created_at').prefetch_related('media_files')
+
+        card_data = []
+
+        for card in cards:
+            media_file = card.media_files.first()
+            card_data.append({
+                'id': card.id,
+                'title': card.title,
+                'description': card.description,
+                'image_url': media_file.file.url if media_file else None,
+            })
+        context['cards'] = card_data
+        # Still need to pass in banners and images
+        banners = Content.objects.filter(
+            content_type='BANNER',
+            enabled=True
+        ).order_by('-created_at').prefetch_related('media_files')
+
+        banner_data = []
+
+        for banner in banners:
+            media_file = banner.media_files.first()
+            banner_data.append({
+                'id': banner.id,
+                'title': banner.title,
+                'message': banner.description,
+                'image_url': media_file.file.url if media_file else None,
+            })
+        context['banners'] = banner_data
+        return context
+
 
 class ContactView(UserGroupContextMixin, CreateView):
     form_class = ContactForm
@@ -134,29 +183,76 @@ class ContactView(UserGroupContextMixin, CreateView):
         return context
 
 
-class AboutView(UserGroupContextMixin, TemplateView):
+class ContentView(UserGroupContextMixin, TemplateView):
+    model = Content
+    template_name = None
+    context_type = None
+    context_object_name = 'content_items'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(
+            content_type=self.content_type,
+            enabled=True
+        ).order_by('order').prefetch_related('media_files')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        content_items = Content.objects.filter(
+            content_type=self.context_type,
+            enabled=True
+        ).order_by('order').prefetch_related('media_files')
+
+        # Flatten all content while tracking image positions
+        image_position = 0
+        content_elements = []
+
+        for item in content_items:
+            # Add images first with their alignment
+            for media in item.media_files.all():
+                if media.media_type == 'IMAGE':
+                    alignment = 'left' if image_position % 2 == 0 else 'right'
+                    content_elements.append({
+                        'type': 'image',
+                        'media': media,
+                        'alignment': alignment
+                    })
+                    image_position += 1
+
+            # Then add the text content
+            if item.title or item.description:
+                content_elements.append({
+                    'type': 'text',
+                    'item': item
+                })
+
+        context['content_elements'] = content_elements
+        return context
+
+
+class AboutView(ContentView):
+    context_type = 'ABOUT'
     template_name = "a_main/about.html"
 
 
-class FAQView(UserGroupContextMixin, TemplateView):
+class FAQView(ContentView):
+    context_type = 'FAQ'
     template_name = "a_main/faq.html"
 
 
-class TermsView(UserGroupContextMixin, TemplateView):
+class TermsView(ContentView):
+    context_type = 'TERMS'
     template_name = "a_main/terms.html"
 
 
-class PrivacyView(UserGroupContextMixin, TemplateView):
+class PrivacyView(ContentView):
+    context_type = 'PRIVACY'
     template_name = "a_main/privacy.html"
 
 
 class SentView(UserGroupContextMixin, TemplateView):
     template_name = "a_main/contact/message_sent.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['cards'] = Card.objects.all()
-        return context
 
 
 # ======================
@@ -167,8 +263,8 @@ class UsersView(UserGroupContextMixin, LoginRequiredMixin, TemplateView):
     template_name = "a_main/users/users.html"
 
 
-class ManagersView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, TemplateView):
-    template_name = "a_main/managers/managers.html"
+# class ManagersView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, TemplateView):
+#     template_name = "a_main/managers/managers.html"
 
 
 # ======================
@@ -331,48 +427,243 @@ class AppointmentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMix
 
 
 # ======================
-# BANNER VIEWS
+# CONTENT CONTROL VIEWS
 # ======================
+
+
+class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
+    model = Content
+    form_class = ContentCreateForm
+    template_name = 'a_main/managers/content/content-create.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        content_type = self.request.GET.get('type', '').upper()
+        if content_type in dict(Content.CONTENT_TYPES).keys():
+            initial['content_type'] = content_type
+        return initial
+
+    def get_success_url(self):
+        # Map content types to their respective URLs
+        content_type = self.object.content_type.lower()
+        return reverse('content-list') + f'?type={content_type}'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        content_type = form.cleaned_data['content_type']
+
+        # Handle media upload for types that need it
+        if content_type in ['BANNER', 'CARD', 'ABOUT']:
+            file = form.cleaned_data.get('file')
+            if file:
+                ContentMedia.objects.create(
+                    content=self.object,
+                    media_type='IMAGE',
+                    file=file
+                )
+
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Create New Content"
+        return context
+
+
+class ContentListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
+    model = Content
+    template_name = 'a_main/managers/content/content-list.html'
+    context_object_name = 'contents'
+    paginate_by = 10
+
+    def get_type_display_plural(self, content_type):
+        # Map of content types to their plural display names
+        plural_names = dict(Content.CONTENT_TYPES)
+        return plural_names.get(content_type, content_type + 's')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.prefetch_related('media_files')
+        # Get valid content types from model
+        valid_types = [choice[0] for choice in Content.CONTENT_TYPES]
+
+        # Filter by content_type if provided in URL
+        content_type = self.request.GET.get('type', '').upper()
+        if content_type:
+            if content_type in valid_types:
+                queryset = queryset.filter(content_type__iexact=content_type)
+                self.normalized_type_name = self.get_type_display_plural(
+                    content_type)
+            else:
+                # Add invalid type flag to context
+                self.invalid_type = content_type
+
+        return queryset.order_by('order', '-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add valid content types to context for template
+        context['valid_content_types'] = [choice[0]
+                                          for choice in Content.CONTENT_TYPES]
+
+        # Add invalid type message if applicable
+        if hasattr(self, 'invalid_type'):
+            context['invalid_type'] = self.invalid_type
+
+        # Add normalized type name if filtering
+        if hasattr(self, 'normalized_type_name'):
+            context['normalized_type_name'] = self.normalized_type_name
+        else:
+            context['normalized_type_name'] = "All "
+
+        return context
+
+
+class ContentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
+    model = Content
+    form_class = ContentUpdateForm
+    template_name = 'a_main/managers/content/content-update.html'
+
+    def get_success_url(self):
+        # Map content types to their respective URLs
+        content_type = self.object.content_type.lower()
+        return reverse('content-list') + f'?type={content_type}'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        content_type = form.cleaned_data['content_type']
+
+        # Handle media upload for types that need it
+        if content_type in ['BANNER', 'CARD', 'ABOUT']:
+            file = form.cleaned_data.get('file')
+            if file:
+                # Delete existing media if it exists
+                self.object.media_files.all().delete()
+                ContentMedia.objects.create(
+                    content=self.object,
+                    media_type='IMAGE',
+                    file=file
+                )
+
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = f"Update {self.object.get_content_type_display()}"
+
+        # Add existing media for preview if it exists
+        if self.object.media_files.exists():
+            context['existing_media'] = self.object.media_files.first()
+
+        return context
+
+
+class ContentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, DeleteView):
+    model = Content
+    template_name = None  # Disable template rendering completely
+
+    def get(self, request, *args, **kwargs):
+        # Immediately process deletion if we got here (JS already confirmed)
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
+
+    def get_success_url(self):
+        content_type = self.request.GET.get('type', '').lower()
+        url = reverse('content-list')
+        return f"{url}?type={content_type}" if content_type else url
+
+
 class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-    model = Banner
     paginate_by = 20
     template_name = 'a_main/managers/banners/banners-list.html'
     context_object_name = 'banners'
-
-
-class BannerCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
-    model = Banner
-    form_class = BannerCreateForm  # Use your custom form
-    template_name = 'a_main/managers/banners/banners-create.html'
-    success_url = reverse_lazy('banners-list')
+    queryset = Content.objects.filter(
+        content_type='BANNER').order_by('-created_at')
 
 
 class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-    model = Banner
-    form_class = BannerUpdateForm  # Use your custom form
+    form_class = BannerUpdateForm
     template_name = 'a_main/managers/banners/banners-update.html'
-    success_url = reverse_lazy('banners-list')
+    success_url = reverse_lazy('banners')
+    queryset = Content.objects.filter(content_type='BANNER')
 
 
-# ======================
-# CARD VIEWS
-# ======================
 class CardListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-    model = Card
     paginate_by = 20
     template_name = 'a_main/managers/cards/cards-list.html'
     context_object_name = 'cards'
 
-
-class CardCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
-    model = Card
-    form_class = CardCreateForm  # Use your custom form
-    template_name = 'a_main/managers/cards/cards-create.html'
-    success_url = reverse_lazy('cards-list')
+    def get_queryset(self):
+        return (
+            Content.objects
+            .filter(content_type='CARD')
+            .order_by('-created_at')
+            .prefetch_related(
+                Prefetch(
+                    'media_files',
+                    queryset=ContentMedia.objects.filter(media_type='IMAGE'),
+                    to_attr='images'  # Optional: rename for clarity
+                )
+            )
+        )
 
 
 class CardUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-    model = Card
-    form_class = CardUpdateForm  # Use your custom form
+    form_class = CardUpdateForm
     template_name = 'a_main/managers/cards/cards-update.html'
-    success_url = reverse_lazy('cards-list')
+    success_url = reverse_lazy('cards')
+    queryset = Content.objects.filter(content_type='CARD')
+
+# class AboutListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
+#     paginate_by = 20
+#     template_name = 'a_main/managers/about/about-list.html'
+#     context_object_name = 'about'
+
+#     def get_queryset(self):
+#         return (
+#             Content.objects
+#             .filter(content_type='ABOUT')
+#             .order_by('-created_at')
+#             .prefetch_related(
+#                 Prefetch(
+#                     'media_files',
+#                     queryset=ContentMedia.objects.filter(media_type='IMAGE'),
+#                     to_attr='images'  # Optional: rename for clarity
+#                 )
+#             )
+#         )
+
+
+# class AboutUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
+#     form_class = AboutUpdateForm
+#     template_name = 'a_main/managers/about/about-update.html'
+#     success_url = reverse_lazy('about')
+#     queryset = Content.objects.filter(content_type='ABOUT')
+
+# class TermsListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
+#     paginate_by = 20
+#     template_name = 'a_main/managers/terms/terms-list.html'
+#     context_object_name = 'terms'
+
+#     def get_queryset(self):
+#         return (
+#             Content.objects
+#             .filter(content_type='ABOUT')
+#             .order_by('-created_at')
+#             .prefetch_related(
+#                 Prefetch(
+#                     'media_files',
+#                     queryset=ContentMedia.objects.filter(media_type='IMAGE'),
+#                     to_attr='images'  # Optional: rename for clarity
+#                 )
+#             )
+#         )
+
+
+# class AboutUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
+#     form_class = AboutUpdateForm
+#     template_name = 'a_main/managers/about/about-update.html'
+#     success_url = reverse_lazy('about')
+#     queryset = Content.objects.filter(content_type='ABOUT')

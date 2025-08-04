@@ -102,13 +102,13 @@ if ask_yes_no "Do you want to migrate and run the django server?"; then
         export DJANGO_SUPERUSER_USERNAME=admin
         export DJANGO_SUPERUSER_EMAIL=admin@proton.me
         export DJANGO_SUPERUSER_PASSWORD=admin
-        python manage.py makemigrations
-        python manage.py migrate
-        python manage.py createsuperuser --noinput
+        python "$django_root/manage.py makemigrations"
+        python "$django_root/manage.py migrate"
+        python "$django_root/manage.py createsuperuser --noinput"
         
         # Run server in the background, then wait for it with signal handling
-        python manage.py runserver 8001 --settings=project.settings.development &
-        SERVER_PID=$!
+        python "$django_root/manage.py runserver 8001 --settings=project.settings.development &
+        SERVER_PID=$!"
         
         # Trap Ctrl+C to only kill the server, not the script
         trap "kill -SIGINT $SERVER_PID" SIGINT

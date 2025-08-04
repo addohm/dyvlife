@@ -30,9 +30,16 @@
             <!-- Notes Field -->
             <div class="col-12">
               <div class="form-floating mb-3">
-                {{ form.notes }}
-                <label for="{{ form.notes.id_for_label }}">Notes</label>
-                {% for error in form.notes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                {{ form.kp_notes }}
+                <label for="{{ form.kp_notes.id_for_label }}">Key Points</label>
+                {% for error in form.kp_notes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-floating mb-3">
+                {{ form.fu_notes }}
+                <label for="{{ form.fu_notes.id_for_label }}">Follow Up Notes</label>
+                {% for error in form.fu_notes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
               </div>
             </div>
             <!-- Status Toggles -->
@@ -71,11 +78,11 @@
       </div>
     </div>
     {% comment %} <!-- Appointment History Section -->
-        <div class="card mt-4">
-          <div class="card-header bg-info text-white">
-            <h3 class="mb-0">
-            <i class="bi bi-clock-history me-2"></i>
-            Appointment History
+                    <div class="card mt-4">
+                      <div class="card-header bg-info text-white">
+                        <h3 class="mb-0">
+                  <i class="bi bi-clock-history me-2"></i>
+                  Appointment History
         </h3>
       </div>
       <div class="card-body">

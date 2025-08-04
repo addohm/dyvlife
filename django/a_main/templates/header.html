@@ -28,16 +28,16 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle"
              href="#"
-             id="navbarDropdownMenuLink"
+             id="productsDropdown"
              role="button"
              data-bs-toggle="dropdown"
-             aria-haspopup="true"
              aria-expanded="false">Products</a>
           <div class="dropdown-menu"
-               aria-labelledby="navbarDropdownMenuLink"
+               aria-labelledby="productsDropdown"
                onclick="handleDropdownClick(event)">
             {% for card in cards %}
               <a class="dropdown-item" href="{% url 'index' %}#{{ card.id }}">{{ card.title }}</a>
+              {% if not forloop.last %}<div class="dropdown-divider"></div>{% endif %}
             {% endfor %}
           </div>
         </li>
@@ -47,16 +47,59 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'about' %}">About</a>
         </li>
-        <li class="nav-item">
-          <hr class="dropdown-divider">
-        </li>
         {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'customers-list' %}">Customers</a>
+          </li>
           {% if is_manager_or_superuser %}
-            {% include "a_main/auth/admin_menu.html" %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                 href="#"
+                 id="adminDropdown"
+                 role="button"
+                 data-bs-toggle="dropdown"
+                 aria-expanded="false">Content Control</a>
+              <div class="dropdown-menu" aria-labelledby="adminDropdown">
+                <a class="dropdown-item" href="{% url 'content-list' %}?type=banner">Banner List</a>
+                <a class="dropdown-item" href="{% url 'content-list' %}?type=card">Product Card List</a>
+                <a class="dropdown-item" href="{% url 'content-list' %}?type=about">About</a>
+                <a class="dropdown-item" href="{% url 'content-list' %}?type=faq">FAQs</a>
+                <a class="dropdown-item" href="{% url 'content-list' %}?type=privacy">Privacy</a>
+                <a class="dropdown-item" href="{% url 'content-list' %}?type=terms">Terms</a>
+                <a class="dropdown-item" href="{% url 'content-list' %}">Everything!</a>
+              </div>
+            </li>
           {% endif %}
-          {% include "a_main/auth/logout_menu.html" %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle"
+               href="#"
+               id="userDropdown"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">{{ user.username }}</a>
+            <div class="dropdown-menu dropdown-menu-end"
+                 aria-labelledby="userDropdown">
+              <a class="dropdown-item" href="#">Profile</a>
+              {% if user.is_superuser %}
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'admin:index' %}">Django Admin</a>
+              {% endif %}
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item"
+                 href="{% url 'logout' %}"
+                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+              <form id="logout-form"
+                    action="{% url 'logout' %}"
+                    method="post"
+                    class="d-none">
+                {% csrf_token %}
+              </form>
+            </div>
+          </li>
         {% else %}
-          {% include "a_main/auth/login_menu.html" %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
         {% endif %}
       </ul>
     </div>
