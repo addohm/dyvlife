@@ -135,12 +135,12 @@ footer > .container {
     width: 30px;
     height: 30px;
   }
-  
+
   footer > .container {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   footer .col-md-4 {
     width: 100%;
     justify-content: center !important;
@@ -167,3 +167,4 @@ footer > .container {
 .magicsuccesstoast {
   z-index: 11;
 }
+

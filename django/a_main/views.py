@@ -131,7 +131,7 @@ class IndexView(UserGroupContextMixin, TemplateView):
         cards = Content.objects.filter(
             content_type='CARD',
             enabled=True
-        ).order_by('-created_at').prefetch_related('media_files')
+        ).order_by('-created_at').order_by('order').prefetch_related('media_files')
 
         card_data = []
 
@@ -148,7 +148,7 @@ class IndexView(UserGroupContextMixin, TemplateView):
         banners = Content.objects.filter(
             content_type='BANNER',
             enabled=True
-        ).order_by('-created_at').prefetch_related('media_files')
+        ).order_by('-created_at').order_by('order').prefetch_related('media_files')
 
         banner_data = []
 
@@ -263,8 +263,8 @@ class UsersView(UserGroupContextMixin, LoginRequiredMixin, TemplateView):
     template_name = "a_main/users/users.html"
 
 
-# class ManagersView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, TemplateView):
-#     template_name = "a_main/managers/managers.html"
+class ManagersView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, TemplateView):
+    template_name = "a_main/managers/managers.html"
 
 
 # ======================
@@ -575,46 +575,46 @@ class ContentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, 
         return f"{url}?type={content_type}" if content_type else url
 
 
-class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-    paginate_by = 20
-    template_name = 'a_main/managers/banners/banners-list.html'
-    context_object_name = 'banners'
-    queryset = Content.objects.filter(
-        content_type='BANNER').order_by('-created_at')
+# class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
+#     paginate_by = 20
+#     template_name = 'a_main/managers/banners/banners-list.html'
+#     context_object_name = 'banners'
+#     queryset = Content.objects.filter(
+#         content_type='BANNER').order_by('-created_at').order_by('order')
 
 
-class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-    form_class = BannerUpdateForm
-    template_name = 'a_main/managers/banners/banners-update.html'
-    success_url = reverse_lazy('banners')
-    queryset = Content.objects.filter(content_type='BANNER')
+# class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
+#     form_class = BannerUpdateForm
+#     template_name = 'a_main/managers/banners/banners-update.html'
+#     success_url = reverse_lazy('banners')
+#     queryset = Content.objects.filter(content_type='BANNER')
 
 
-class CardListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-    paginate_by = 20
-    template_name = 'a_main/managers/cards/cards-list.html'
-    context_object_name = 'cards'
+# class CardListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
+#     paginate_by = 20
+#     template_name = 'a_main/managers/cards/cards-list.html'
+#     context_object_name = 'cards'
 
-    def get_queryset(self):
-        return (
-            Content.objects
-            .filter(content_type='CARD')
-            .order_by('-created_at')
-            .prefetch_related(
-                Prefetch(
-                    'media_files',
-                    queryset=ContentMedia.objects.filter(media_type='IMAGE'),
-                    to_attr='images'  # Optional: rename for clarity
-                )
-            )
-        )
+#     def get_queryset(self):
+#         return (
+#             Content.objects
+#             .filter(content_type='CARD')
+#             .order_by('-created_at')
+#             .prefetch_related(
+#                 Prefetch(
+#                     'media_files',
+#                     queryset=ContentMedia.objects.filter(media_type='IMAGE'),
+#                     to_attr='images'  # Optional: rename for clarity
+#                 )
+#             )
+#         )
 
 
-class CardUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-    form_class = CardUpdateForm
-    template_name = 'a_main/managers/cards/cards-update.html'
-    success_url = reverse_lazy('cards')
-    queryset = Content.objects.filter(content_type='CARD')
+# class CardUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
+    # form_class = CardUpdateForm
+    # template_name = 'a_main/managers/cards/cards-update.html'
+    # success_url = reverse_lazy('cards')
+    # queryset = Content.objects.filter(content_type='CARD')
 
 # class AboutListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
 #     paginate_by = 20

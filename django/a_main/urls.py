@@ -20,7 +20,7 @@ urlpatterns = [
     path('denied/', FailedPermissionsView.as_view(), name='no-permissions'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('login/', CustomLoginView.as_view(), name='login'),
-    # path('managers/', ManagersView.as_view(), name='managers'),
+    path('managers/', ManagersView.as_view(), name='managers'),
     path('users/', UsersView.as_view(), name='users'),
     path('customers/', CustomersListView.as_view(), name='customers-list'),
     path('customers/<int:pk>/update/',

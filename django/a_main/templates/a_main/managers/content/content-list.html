@@ -37,6 +37,7 @@
                             object-fit: cover">
               {% endif %}
             {% endwith %}
+            <span class="text-dark">Ordering: {{ content.order }}</span>
             <div class="card-body">
               <h5 class="card-title">{{ content.title }}</h5>
               <p class="card-text">{{ content.description|truncatewords:20 }}</p>
