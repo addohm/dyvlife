@@ -5,6 +5,11 @@ RUN mkdir -p /var/cache/nginx /var/run/nginx && \
     chown -R nginx:nginx /var/cache/nginx /var/run/nginx && \
     chmod -R 755 /var/cache/nginx /var/run/nginx
 
+# Update apk and install psycopg2 and pillow dependencies
+RUN apk update && \
+    apk add --no-cache \
+    curl
+
 # Remove default config that causes warnings
 RUN rm /etc/nginx/conf.d/default.conf
 

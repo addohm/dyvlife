@@ -24,7 +24,8 @@ RUN apk update && \
     apk add --no-cache \
     postgresql-dev \
     zlib-dev \
-    jpeg-dev
+    jpeg-dev \
+    curl
 
 # Upgrade pip to ensure we have the latest version for installing dependencies
 RUN pip install --no-cache-dir --upgrade pip
