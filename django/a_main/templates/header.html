@@ -20,7 +20,9 @@
     <div class="collapse navbar-collapse" id="collapsibleNavId">
       <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'index' %}" aria-current="page">
+          <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% elif request.resolver_match.url_name == 'faq' %}active{% elif request.resolver_match.url_name == 'terms' %}active{% elif request.resolver_match.url_name == 'privacy' %}active{% endif %}"
+             href="{% url 'index' %}"
+             aria-current="page">
             Home
             <span class="visually-hidden">(current)</span>
           </a>
@@ -42,10 +44,12 @@
           </div>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+          <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
+             href="{% url 'contact' %}">Contact</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'about' %}">About</a>
+          <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
+             href="{% url 'about' %}">About</a>
         </li>
         {% if user.is_authenticated %}
           <li class="nav-item">
@@ -98,7 +102,8 @@
           </li>
         {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
+            <a class="nav-link  {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
+               href="{% url 'login' %}">Login</a>
           </li>
         {% endif %}
       </ul>

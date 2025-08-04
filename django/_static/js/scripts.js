@@ -37,3 +37,4 @@ function handleDropdownClick(event) {
     }, 50);
   }
 }
+
