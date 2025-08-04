@@ -1,3 +1,4 @@
+import json
 from django.views.generic import TemplateView, CreateView, UpdateView, DetailView, ListView, View, DeleteView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -7,7 +8,9 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth import login
 from django.http import JsonResponse, HttpResponseRedirect
-from django.db.models import Prefetch
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import CustomerProfile, Appointment, Content
 from .forms import *
@@ -399,6 +402,59 @@ class CustomersUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin
 # CUSTOMER APPOINTMENT VIEWS
 # ======================
 
+@require_POST
+@login_required
+def update_appointment_status(request, pk):
+    try:
+        # Parse JSON data from request body
+        data = json.loads(request.body)
+        field = data.get('field')
+        value = data.get('value')
+
+        # Validate input
+        if field not in ['invoiced', 'paid']:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid field'
+            }, status=400)
+
+        # Get appointment
+        appointment = Appointment.objects.get(pk=pk)
+
+        # Verify permission - user must be staff or superuser
+        if not request.user.is_staff and not request.user.is_superuser:
+            return JsonResponse({
+                'success': False,
+                'message': 'Permission denied'
+            }, status=403)
+
+        # Update the field
+        setattr(appointment, field, value)
+        appointment.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Appointment {field} status updated successfully',
+            'new_value': value
+        })
+
+    except Appointment.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Appointment not found'
+        }, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
+
+
 class AppointmentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Appointment
     form_class = AppointmentForm
@@ -429,6 +485,7 @@ class AppointmentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMix
 # ======================
 # CONTENT CONTROL VIEWS
 # ======================
+
 
 class ContentListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
     model = Content
@@ -535,38 +592,26 @@ class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, 
         return context
 
 
-class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
+class ContentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Content
-    form_class = ContentCreateForm
-    template_name = 'a_main/managers/content/content-create.html'
-
-    def get_initial(self):
-        initial = super().get_initial()
-        content_type = self.request.GET.get('type', '').upper()
-        if content_type in dict(Content.CONTENT_TYPES).keys():
-            initial['content_type'] = content_type
-        return initial
+    form_class = ContentUpdateForm
+    template_name = 'a_main/managers/content/content-update.html'
 
     def get_success_url(self):
+        # Map content types to their respective URLs
         content_type = self.object.content_type.lower()
         return reverse('content-list') + f'?type={content_type}'
 
     def form_valid(self, form):
-        # Calculate the next order value for this content type
-        content_type = form.cleaned_data['content_type']
-        max_order = Content.objects.filter(content_type=content_type).aggregate(
-            max_order=models.Max('order')
-        )['max_order'] or -1  # Default to -1 if no content exists yet
-
-        # Set the order to max_order + 1
-        form.instance.order = max_order + 1
-
         response = super().form_valid(form)
+        content_type = form.cleaned_data['content_type']
 
         # Handle media upload for types that need it
         if content_type in ['BANNER', 'CARD', 'ABOUT']:
             file = form.cleaned_data.get('file')
             if file:
+                # Delete existing media if it exists
+                self.object.media_files.all().delete()
                 ContentMedia.objects.create(
                     content=self.object,
                     media_type='IMAGE',
@@ -577,5 +622,10 @@ class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = "Create New Content"
+        context['page_title'] = f"Update {self.object.get_content_type_display()}"
+
+        # Add existing media for preview if it exists
+        if self.object.media_files.exists():
+            context['existing_media'] = self.object.media_files.first()
+
         return context

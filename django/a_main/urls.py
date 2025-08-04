@@ -29,6 +29,9 @@ urlpatterns = [
          AppointmentUpdateView.as_view(), name='appointment-update'),
     path('appointments/<int:pk>/delete/',
          AppointmentDeleteView.as_view(), name='appointment-delete'),
+    path('appointments/<int:pk>/update_status/',
+         update_appointment_status,
+         name='appointment-update-status'),
 
     # Universal Content Create View
     path('content/create/',
