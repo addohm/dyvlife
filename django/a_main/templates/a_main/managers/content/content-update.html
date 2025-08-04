@@ -85,7 +85,7 @@
     </div>
   </div>
 {% endblock maincontent %}
-{% block scripts %}
+{% block morescripts %}
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         const contentTypeSelect = document.getElementById('contentTypeSelect');
@@ -155,22 +155,4 @@
         });
     });
   </script>
-  <style>
-    .invalid-feedback {
-        display: none;
-        width: 100%;
-        margin-top: 0.25rem;
-        font-size: 0.875em;
-        color: #dc3545;
-    }
-
-    .is-invalid ~ .invalid-feedback,
-    .is-invalid ~ div > .invalid-feedback {
-        display: block;
-    }
-
-    #fileField, #urlField {
-        display: none;
-    }
-  </style>
-{% endblock scripts %}
+{% endblock morescripts %}

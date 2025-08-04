@@ -133,13 +133,13 @@
     </div>
   </div>
 {% endblock maincontent %}
-{% block scripts %}
+{% block morescripts %}
   <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modal = new bootstrap.Modal(document.getElementById('magicLinkModal'));
     const toast = new bootstrap.Toast(document.getElementById('successToast'));
     let currentProfileId = null;
-    
+
     // Set up magic link buttons
     document.querySelectorAll('.send-magic-link').forEach(button => {
         button.addEventListener('click', function() {
@@ -148,11 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.show();
         });
     });
-    
+
     // Confirm send
     document.getElementById('confirm-send').addEventListener('click', function() {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
+
         fetch(window.location.href, {
             method: 'POST',
             headers: {
@@ -179,4 +179,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
   </script>
-{% endblock scripts %}
+{% endblock morescripts %}

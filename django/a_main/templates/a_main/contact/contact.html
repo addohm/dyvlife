@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% block morehead %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock morehead %}
 {% block maincontent %}
   <h1 class="text-center mb-4">Contact Us</h1>
   <p class="text-center mb-5"></p>
@@ -42,16 +45,24 @@
     </div>
   </form>
 {% endblock maincontent %}
-{% block scripts %}
+{% block morescripts %}
   <script>
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
-      // Show loading spinner and change button text
-      document.getElementById('loadingSpinner').classList.remove('d-none');
-      document.getElementById('submitText').textContent = 'Sending...';
-      document.getElementById('submitButton').disabled = true;
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = this;
 
-      // The form will continue to submit normally
-      // The redirect to /sent/ will happen after submission is complete
-    });
+  Swal.fire({
+    title: 'Sending your message',
+    html: 'Please wait...',
+    timerProgressBar: true,
+    didOpen: () => {
+      Swal.showLoading();
+      // Submit the form after showing the alert
+      form.submit();
+    },
+    // This will close when the page redirects to /sent/
+    allowOutsideClick: false
+  });
+});
   </script>
-{% endblock scripts %}
+{% endblock morescripts %}
