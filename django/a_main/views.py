@@ -430,46 +430,6 @@ class AppointmentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMix
 # CONTENT CONTROL VIEWS
 # ======================
 
-
-class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
-    model = Content
-    form_class = ContentCreateForm
-    template_name = 'a_main/managers/content/content-create.html'
-
-    def get_initial(self):
-        initial = super().get_initial()
-        content_type = self.request.GET.get('type', '').upper()
-        if content_type in dict(Content.CONTENT_TYPES).keys():
-            initial['content_type'] = content_type
-        return initial
-
-    def get_success_url(self):
-        # Map content types to their respective URLs
-        content_type = self.object.content_type.lower()
-        return reverse('content-list') + f'?type={content_type}'
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        content_type = form.cleaned_data['content_type']
-
-        # Handle media upload for types that need it
-        if content_type in ['BANNER', 'CARD', 'ABOUT']:
-            file = form.cleaned_data.get('file')
-            if file:
-                ContentMedia.objects.create(
-                    content=self.object,
-                    media_type='IMAGE',
-                    file=file
-                )
-
-        return response
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = "Create New Content"
-        return context
-
-
 class ContentListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
     model = Content
     template_name = 'a_main/managers/content/content-list.html'
@@ -519,45 +479,6 @@ class ContentListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, Li
         return context
 
 
-class ContentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-    model = Content
-    form_class = ContentUpdateForm
-    template_name = 'a_main/managers/content/content-update.html'
-
-    def get_success_url(self):
-        # Map content types to their respective URLs
-        content_type = self.object.content_type.lower()
-        return reverse('content-list') + f'?type={content_type}'
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        content_type = form.cleaned_data['content_type']
-
-        # Handle media upload for types that need it
-        if content_type in ['BANNER', 'CARD', 'ABOUT']:
-            file = form.cleaned_data.get('file')
-            if file:
-                # Delete existing media if it exists
-                self.object.media_files.all().delete()
-                ContentMedia.objects.create(
-                    content=self.object,
-                    media_type='IMAGE',
-                    file=file
-                )
-
-        return response
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = f"Update {self.object.get_content_type_display()}"
-
-        # Add existing media for preview if it exists
-        if self.object.media_files.exists():
-            context['existing_media'] = self.object.media_files.first()
-
-        return context
-
-
 class ContentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, DeleteView):
     model = Content
     template_name = None  # Disable template rendering completely
@@ -575,95 +496,86 @@ class ContentDeleteView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, 
         return f"{url}?type={content_type}" if content_type else url
 
 
-# class BannerListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-#     paginate_by = 20
-#     template_name = 'a_main/managers/banners/banners-list.html'
-#     context_object_name = 'banners'
-#     queryset = Content.objects.filter(
-#         content_type='BANNER').order_by('-created_at').order_by('order')
+class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
+    model = Content
+    form_class = ContentCreateForm
+    template_name = 'a_main/managers/content/content-create.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        content_type = self.request.GET.get('type', '').upper()
+        if content_type in dict(Content.CONTENT_TYPES).keys():
+            initial['content_type'] = content_type
+        return initial
+
+    def get_success_url(self):
+        # Map content types to their respective URLs
+        content_type = self.object.content_type.lower()
+        return reverse('content-list') + f'?type={content_type}'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        content_type = form.cleaned_data['content_type']
+
+        # Handle media upload for types that need it
+        if content_type in ['BANNER', 'CARD', 'ABOUT']:
+            file = form.cleaned_data.get('file')
+            if file:
+                ContentMedia.objects.create(
+                    content=self.object,
+                    media_type='IMAGE',
+                    file=file
+                )
+
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Create New Content"
+        return context
 
 
-# class BannerUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-#     form_class = BannerUpdateForm
-#     template_name = 'a_main/managers/banners/banners-update.html'
-#     success_url = reverse_lazy('banners')
-#     queryset = Content.objects.filter(content_type='BANNER')
+class ContentCreateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, CreateView):
+    model = Content
+    form_class = ContentCreateForm
+    template_name = 'a_main/managers/content/content-create.html'
 
+    def get_initial(self):
+        initial = super().get_initial()
+        content_type = self.request.GET.get('type', '').upper()
+        if content_type in dict(Content.CONTENT_TYPES).keys():
+            initial['content_type'] = content_type
+        return initial
 
-# class CardListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-#     paginate_by = 20
-#     template_name = 'a_main/managers/cards/cards-list.html'
-#     context_object_name = 'cards'
+    def get_success_url(self):
+        content_type = self.object.content_type.lower()
+        return reverse('content-list') + f'?type={content_type}'
 
-#     def get_queryset(self):
-#         return (
-#             Content.objects
-#             .filter(content_type='CARD')
-#             .order_by('-created_at')
-#             .prefetch_related(
-#                 Prefetch(
-#                     'media_files',
-#                     queryset=ContentMedia.objects.filter(media_type='IMAGE'),
-#                     to_attr='images'  # Optional: rename for clarity
-#                 )
-#             )
-#         )
+    def form_valid(self, form):
+        # Calculate the next order value for this content type
+        content_type = form.cleaned_data['content_type']
+        max_order = Content.objects.filter(content_type=content_type).aggregate(
+            max_order=models.Max('order')
+        )['max_order'] or -1  # Default to -1 if no content exists yet
 
+        # Set the order to max_order + 1
+        form.instance.order = max_order + 1
 
-# class CardUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-    # form_class = CardUpdateForm
-    # template_name = 'a_main/managers/cards/cards-update.html'
-    # success_url = reverse_lazy('cards')
-    # queryset = Content.objects.filter(content_type='CARD')
+        response = super().form_valid(form)
 
-# class AboutListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-#     paginate_by = 20
-#     template_name = 'a_main/managers/about/about-list.html'
-#     context_object_name = 'about'
+        # Handle media upload for types that need it
+        if content_type in ['BANNER', 'CARD', 'ABOUT']:
+            file = form.cleaned_data.get('file')
+            if file:
+                ContentMedia.objects.create(
+                    content=self.object,
+                    media_type='IMAGE',
+                    file=file
+                )
 
-#     def get_queryset(self):
-#         return (
-#             Content.objects
-#             .filter(content_type='ABOUT')
-#             .order_by('-created_at')
-#             .prefetch_related(
-#                 Prefetch(
-#                     'media_files',
-#                     queryset=ContentMedia.objects.filter(media_type='IMAGE'),
-#                     to_attr='images'  # Optional: rename for clarity
-#                 )
-#             )
-#         )
+        return response
 
-
-# class AboutUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-#     form_class = AboutUpdateForm
-#     template_name = 'a_main/managers/about/about-update.html'
-#     success_url = reverse_lazy('about')
-#     queryset = Content.objects.filter(content_type='ABOUT')
-
-# class TermsListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, ListView):
-#     paginate_by = 20
-#     template_name = 'a_main/managers/terms/terms-list.html'
-#     context_object_name = 'terms'
-
-#     def get_queryset(self):
-#         return (
-#             Content.objects
-#             .filter(content_type='ABOUT')
-#             .order_by('-created_at')
-#             .prefetch_related(
-#                 Prefetch(
-#                     'media_files',
-#                     queryset=ContentMedia.objects.filter(media_type='IMAGE'),
-#                     to_attr='images'  # Optional: rename for clarity
-#                 )
-#             )
-#         )
-
-
-# class AboutUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
-#     form_class = AboutUpdateForm
-#     template_name = 'a_main/managers/about/about-update.html'
-#     success_url = reverse_lazy('about')
-#     queryset = Content.objects.filter(content_type='ABOUT')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = "Create New Content"
+        return context
