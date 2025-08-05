@@ -7,15 +7,14 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth import login
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import CustomerProfile, Appointment, Content
 from .forms import *
 
-from .utils import enqueue_email
+from .utils import enqueue_email, send_appointment_invite, generate_ics_for_appointment
 
 # ======================
 # CUSTOM MIXINS
@@ -380,13 +379,16 @@ class CustomersUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin
             appointment_form = AppointmentForm(request.POST)
             if appointment_form.is_valid():
                 appointment = appointment_form.save(commit=False)
-                # Use the view's object (CustomerProfile)
                 appointment.customer = self.object
                 appointment.save()
+
+                # Send calendar invite if checkbox is checked
+                if request.POST.get('send_invite'):
+                    send_appointment_invite(appointment)
+
                 messages.success(request, "Appointment added successfully!")
                 return redirect('customers-update', pk=self.object.pk)
             else:
-                # If form is invalid, add errors to context
                 context = self.get_context_data()
                 context['appointment_form'] = appointment_form
                 return self.render_to_response(context)
@@ -401,6 +403,7 @@ class CustomersUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin
 # ======================
 # CUSTOMER APPOINTMENT VIEWS
 # ======================
+
 
 @require_POST
 @login_required
@@ -455,6 +458,24 @@ def update_appointment_status(request, pk):
         }, status=500)
 
 
+def send_appointment_invite_view(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if send_appointment_invite(appointment):
+        messages.success(request, "Calendar invite sent successfully!")
+    else:
+        messages.error(request, "Failed to send calendar invite.")
+    return redirect('customers-update', pk=appointment.customer.pk)
+
+
+def download_appointment_ics(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    ics_content = generate_ics_for_appointment(appointment)
+
+    response = HttpResponse(ics_content, content_type='text/calendar')
+    response['Content-Disposition'] = f'attachment; filename="appointment_{appointment.id}.ics"'
+    return response
+
+
 class AppointmentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, UpdateView):
     model = Appointment
     form_class = AppointmentForm
@@ -466,6 +487,8 @@ class AppointmentUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMix
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = f"Update Appointment for {self.object.customer.user.username}"
+        # Add these lines to include the appointment in context
+        context['appointment'] = self.object
         return context
 
 

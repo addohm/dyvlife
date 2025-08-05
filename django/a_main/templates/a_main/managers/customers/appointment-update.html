@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block morehead %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock morehead %}
 {% block maincontent %}
   <div class="container mt-4">
     <div class="card">
@@ -27,6 +30,20 @@
                 {% for error in form.date.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
               </div>
             </div>
+            <div class="col-md-3">
+              <div class="form-check form-switch mb-3">
+                {{ form.invoiced }}
+                <label class="form-check-label" for="{{ form.invoiced.id_for_label }}">Invoiced</label>
+                <small class="form-text text-muted d-block">Mark when invoice has been sent</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-check form-switch mb-3">
+                {{ form.paid }}
+                <label class="form-check-label" for="{{ form.paid.id_for_label }}">Paid</label>
+                <small class="form-text text-muted d-block">Mark when payment is received</small>
+              </div>
+            </div>
             <!-- Notes Field -->
             <div class="col-12">
               <div class="form-floating mb-3">
@@ -43,20 +60,6 @@
               </div>
             </div>
             <!-- Status Toggles -->
-            <div class="col-md-6">
-              <div class="form-check form-switch mb-3">
-                {{ form.invoiced }}
-                <label class="form-check-label" for="{{ form.invoiced.id_for_label }}">Invoiced</label>
-                <small class="form-text text-muted d-block">Mark when invoice has been sent</small>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-check form-switch mb-3">
-                {{ form.paid }}
-                <label class="form-check-label" for="{{ form.paid.id_for_label }}">Paid</label>
-                <small class="form-text text-muted d-block">Mark when payment is received</small>
-              </div>
-            </div>
           </div>
           <!-- Form actions -->
           <div class="d-flex justify-content-between mt-4">
@@ -65,24 +68,49 @@
               <i class="bi bi-arrow-left me-1"></i> Back to Customer
             </a>
             <div>
-              <a href="{% url 'appointment-delete' object.pk %}"
-                 class="btn btn-outline-danger me-2">
-                <i class="bi bi-trash me-1"></i> Delete
+              <a href="{% url 'download-appointment-ics' object.pk %}"
+                 class="btn btn-outline-info me-2"
+                 title="Download Calendar File">
+                <i class="bi bi-download me-1"></i> Download ICS
               </a>
-              <button type="submit" class="btn btn-light brand-color-bg text-white">
-                <i class="bi bi-save me-1"></i> Save Changes
-              </button>
+              <form method="post"
+                    action="{% url 'send-appointment-invite' object.pk %}"
+                    class="d-inline me-2"
+                    id="sendApptForm">
+                {% csrf_token %}
+                <button type="button"
+                        class="btn btn-outline-success me-2"
+                        title="Send Calendar Invite"
+                        onclick="sendAppointmentInvite('{% url 'send-appointment-invite' object.pk %}')">
+                  <i class="bi bi-calendar-plus me-1"></i> Send Invite
+                </button>
+              </form>
             </div>
           </div>
         </form>
       </div>
     </div>
+    <br />
+    <div class="row">
+      <div class="col-md-6 d-flex justify-content-start">
+        <!-- Add the new buttons here -->
+        <a href="{% url 'appointment-delete' object.pk %}"
+           class="btn btn-danger me-2">
+          <i class="bi bi-trash me-1"></i> Delete
+        </a>
+      </div>
+      <div class="col-md-6 d-flex justify-content-end">
+        <button type="submit" class="btn btn-light brand-color-bg text-white">
+          <i class="bi bi-save me-1"></i> Save Changes
+        </button>
+      </div>
+    </div>
     {% comment %} <!-- Appointment History Section -->
-                        <div class="card mt-4">
-                          <div class="card-header bg-info text-white">
-                            <h3 class="mb-0">
-                    <i class="bi bi-clock-history me-2"></i>
-                    Appointment History
+                                                                                                                            <div class="card mt-4">
+                                                                                                                              <div class="card-header bg-info text-white">
+                                                                                                                                <h3 class="mb-0">
+                                                                      <i class="bi bi-clock-history me-2"></i>
+                                                                      Appointment History
         </h3>
       </div>
       <div class="card-body">
@@ -121,5 +149,49 @@ document.addEventListener('DOMContentLoaded', function() {
         minDate: "today"
     });
 });
+
+function sendAppointmentInvite(url) {
+    Swal.fire({
+        title: 'Sending your message',
+        html: 'Please wait...',
+        timerProgressBar: true,
+        didOpen: () => {
+            Swal.showLoading();
+
+            // Make AJAX call
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Invite Sent!',
+                        text: 'The appointment invite has been sent successfully.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    throw new Error('Failed to send invite');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'There was a problem sending the invite. Please try again.',
+                });
+            });
+        },
+        allowOutsideClick: false
+    });
+}
   </script>
 {% endblock morescripts %}

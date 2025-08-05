@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block morehead %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% endblock morehead %}
 {% block maincontent %}
   <div class="mt-4">
     <div class="card">
@@ -95,7 +98,6 @@
             <div class="row g-3">
               {% for field in appointment_form %}
                 {% if field.name != 'customer' %}
-                  <!-- Exclude customer field -->
                   {% if field.field.widget.input_type == "checkbox" %}
                     <div class="col-md-3 d-flex align-items-center">
                       <div class="form-check form-switch me-4">
@@ -169,7 +171,6 @@
                       </div>
                     </td>
                     <td>
-                      <!---->
                       <div class="d-flex">
                         <a href="{% url 'appointment-update' appointment.id %}"
                            class="btn btn-sm btn-outline-primary me-2"
@@ -177,12 +178,26 @@
                           <i class="bi bi-pencil"></i>
                         </a>
                         <a href="{% url 'appointment-delete' appointment.id %}"
-                           class="btn btn-sm btn-outline-danger"
+                           class="btn btn-sm btn-outline-danger me-2"
                            title="Delete Appointment">
                           <i class="bi bi-trash"></i>
                         </a>
+                        <form method="post"
+                              action="{% url 'send-appointment-invite' appointment.id %}"
+                              class="d-inline me-2 send-appt-form">
+                          {% csrf_token %}
+                          <button type="submit"
+                                  class="btn btn-sm btn-outline-success"
+                                  title="Send Calendar Invite">
+                            <i class="bi bi-calendar-plus"></i>
+                          </button>
+                        </form>
+                        <a href="{% url 'download-appointment-ics' appointment.id %}"
+                           class="btn btn-sm btn-outline-info"
+                           title="Download Calendar File">
+                          <i class="bi bi-download"></i>
+                        </a>
                       </div>
-                      <!-- -->
                     </td>
                   </tr>
                 {% empty %}
@@ -254,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize event listeners
+    // Initialize event listeners for toggles
     document.querySelectorAll('.invoiced-toggle').forEach(toggle => {
         toggle.addEventListener('change', function() {
             handleToggleChange(this, 'invoiced');
@@ -266,6 +281,26 @@ document.addEventListener('DOMContentLoaded', function() {
             handleToggleChange(this, 'paid');
         });
     });
+
+    // Add contact form submission handler if the form exists
+    document.querySelectorAll('.send-appt-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+
+        Swal.fire({
+            title: 'Sending your message',
+            html: 'Please wait...',
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+                // Submit the form after showing the alert
+                form.submit();
+            },
+            allowOutsideClick: false
+          });
+      });
+  });
 });
   </script>
   <!-- Toast Notification -->

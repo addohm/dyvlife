@@ -32,7 +32,10 @@ urlpatterns = [
     path('appointments/<int:pk>/update_status/',
          update_appointment_status,
          name='appointment-update-status'),
-
+    path('appointments/<int:pk>/send-invite/',
+         send_appointment_invite_view, name='send-appointment-invite'),
+    path('appointments/<int:pk>/download-ics/',
+         download_appointment_ics, name='download-appointment-ics'),
     # Universal Content Create View
     path('content/create/',
          ContentCreateView.as_view(), name='content-create'),
