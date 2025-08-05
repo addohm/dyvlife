@@ -1,3 +1,7 @@
+# Project Specific
+django/_static/images/card
+django/_static/images/banner
+
 # Dev Notes
 TODO.md
 
