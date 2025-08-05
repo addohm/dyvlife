@@ -44,13 +44,16 @@ def send_email(instance, subject_template=None, body_template=None, html_templat
         formatted_subject = subject.format(**context)
         formatted_body = body.format(**context)
 
+        print("===================================DEBUG START====================================")
         print(f"DEBUG - Instance contents: {vars(instance)}")
-        # print(f"DEBUG - Formatted subject: {formatted_subject}")
-        # print(f"DEBUG - Formatted subject: {formatted_body}")
-        # print(
-        #     f"DEBUG - Attempting to send from e-mail address: {settings.EMAIL_HOST_USER}")
-        # print(f"DEBUG - Attempting to send to: {instance.email}")
-        # print(f"DEBUG - Reply to: {settings.EMAIL_HOST_USER}")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print(f"DEBUG - Formatted subject: {formatted_subject}")
+        print(f"DEBUG - Formatted subject: {formatted_body}")
+        print(
+            f"DEBUG - Attempting to send from e-mail address: {settings.EMAIL_HOST_USER}")
+        print(f"DEBUG - Attempting to send to: {instance.email}")
+        print(f"DEBUG - Reply to: {settings.EMAIL_HOST_USER}")
+        print("====================================DEBUG END=====================================")
 
         # Create and send email
         email = EmailMessage(
