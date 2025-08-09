@@ -116,23 +116,3 @@ class MicrosoftGraphEmailSender:
         else:
             print(f"Failed to send email. Error: {response.json()}")
             return False
-
-
-# # Example Usage
-# if __name__ == "__main__":
-#     email_sender = MicrosoftGraphEmailSender()
-
-#     # Send a simple email
-#     email_sender.send_email(
-#         to_email="recipient@example.com",
-#         subject="Hello from Python!",
-#         message="This is a test email sent using Microsoft Graph API."
-#     )
-
-#     # Send an email with attachments
-#     email_sender.send_email(
-#         to_email="recipient@example.com",
-#         subject="Report attached",
-#         message="Please find the report attached.",
-#         attachments=["report.pdf", "data.xlsx"]  # List of file paths
-#     )
