@@ -143,16 +143,16 @@ MEDIA_URL = "media/"
 
 # https://django-jazzmin.readthedocs.io/
 JAZZMIN_SETTINGS = {
-    "site_title": "CDC Admin",
-    "site_header": "Cave Dive Club",
-    "site_brand": "Cave Dive Club",
-    "site_logo": "/images/logos/cdc_logo_transinv_sm.png",
-    "login_logo": '/images/logos/cdc_logo_trans_sm.png',
-    "login_logo_dark": '/images/logos/cdc_logo_transinv_sm.png',
+    "site_title": "Your-Voyage.life Admin",
+    "site_header": "Your-Voyage.life",
+    "site_brand": "Your-Voyage.life",
+    "site_logo": "/images/header_brand.png",
+    "login_logo": '/images/header_brand.png',
+    "login_logo_dark": '/images/header_brand.png',
     "site_logo_classes": "",
-    "site_icon": '/images/favicons/favicon-32x32.png',
-    "welcome_sign": "Welcome to the CDC Admin",
-    "copyright": "Cave Dive Club",
+    "site_icon": '/images/favicon.ico',
+    "welcome_sign": "Welcome to the Your-Voyage.life Admin",
+    "copyright": "Your-Voyage.life",
     "user_avatar": None,
 
     ############
