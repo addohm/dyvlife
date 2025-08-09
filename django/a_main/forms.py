@@ -6,7 +6,8 @@ from django.utils.html import format_html
 
 from .models import Contact, CustomerProfile, Appointment, Content, ContentMedia
 
-from .utils import enqueue_email
+# from .utils import enqueue_email
+from .utils import send_contact_email
 
 
 class LoginForm(AuthenticationForm):
@@ -105,8 +106,16 @@ class ContactForm(forms.ModelForm):
         customers_group, _ = Group.objects.get_or_create(name='Customers')
         user.groups.add(customers_group)
 
-        # Queue the email to be sent after transaction commits
-        enqueue_email(instance)
+        class ContactContext:
+            def __init__(self, instance, name, email, interest):
+                self.instance = instance
+                self.name = name
+                self.email = email
+                self.interest = interest
+
+        context = ContactContext(instance, name, email, interest)
+
+        send_contact_email(context)
 
 
 class CustomerUpdateForm(forms.ModelForm):
@@ -161,13 +170,6 @@ class CustomerUpdateForm(forms.ModelForm):
 
 
 class AppointmentForm(forms.ModelForm):
-    # send_invite = forms.BooleanField(
-    #     required=False,
-    #     initial=True,
-    #     label="Send calendar invite",
-    #     help_text="Check this to send a calendar invite to the customer"
-    # )
-
     class Meta:
         model = Appointment
         fields = ['date', 'invoiced', 'paid', 'kp_notes', 'fu_notes']
@@ -186,9 +188,6 @@ class AppointmentForm(forms.ModelForm):
         self.fields['invoiced'].widget.attrs.update(
             {'class': 'form-check-input'})
         self.fields['paid'].widget.attrs.update({'class': 'form-check-input'})
-        # Add class for the new field
-        # self.fields['send_invite'].widget.attrs.update(
-        #     {'class': 'form-check-input'})
 
 
 class ContentCreateForm(forms.ModelForm):

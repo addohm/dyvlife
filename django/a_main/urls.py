@@ -17,6 +17,7 @@ urlpatterns = [
     path('privacy/', PrivacyView.as_view(), name='privacy'),
     #     path('privacy/', PrivacyUpdateView.as_view(), name='privacy'),
     path('sent/', SentView.as_view(), name='sent'),
+    path('send_fail/', SendFailView.as_view(), name='send-fail'),
     path('denied/', FailedPermissionsView.as_view(), name='no-permissions'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('login/', CustomLoginView.as_view(), name='login'),

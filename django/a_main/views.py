@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from .models import CustomerProfile, Appointment, Content
 from .forms import *
 
-from .utils import enqueue_email, send_appointment_invite, generate_ics_for_appointment
+from .utils import send_calendar_invite, send_magic_link_email, generate_ics_for_appointment
 
 # ======================
 # CUSTOM MIXINS
@@ -257,6 +257,10 @@ class SentView(UserGroupContextMixin, TemplateView):
     template_name = "a_main/contact/message_sent.html"
 
 
+class SendFailView(UserGroupContextMixin, TemplateView):
+    template_name = "a_main/contact/message_send_fail.html"
+
+
 # ======================
 # ROLE-SPECIFIC VIEWS
 # ======================
@@ -306,48 +310,7 @@ class CustomersListView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin, 
                     'instance': profile,
                 }
 
-                # Define email templates
-                subject_template = "Your Magic Login Link"
-                body_template = f'''
-                Hello {profile.user.username},
-
-                You requested a magic login link. Click the link below to access your account:
-
-                {login_url}
-
-                This link will expire in 24 hours.
-
-                If you didn't request this, please ignore this email.
-                '''
-
-                html_template = f'''
-                <p>Hello {profile.user.username},</p>
-                <p>You requested a magic login link. Click the button below to access your account:</p>
-                <p><a href="{login_url}" class="btn btn-primary">Login Now</a></p>
-                <p>This link will expire in 24 hours.</p>
-                <p>If you didn't request this, please ignore this email.</p>
-                '''
-
-                # Create a simple object to hold the email data
-                class EmailInstance:
-                    def __init__(self):
-                        self.email = profile.user.email
-                        self.subject = subject_template
-                        self.message = body_template
-                        self.html_message = html_template
-                        self.id = profile.id
-
-                email_instance = EmailInstance()
-
-                # Add extra context that might be needed by the email templates
-                extra_context = {
-                    'html_message': html_template,
-                    'login_url': login_url,
-                }
-
-                # Queue the email
-                enqueue_email(email_instance)
-
+                send_magic_link_email(request, context)
                 return JsonResponse({'success': True, 'message': 'Magic link sent successfully!'})
             except Exception as e:
                 return JsonResponse({'success': False, 'message': str(e)}, status=400)
@@ -382,9 +345,8 @@ class CustomersUpdateView(ManagerOrSuperuserRequiredMixin, UserGroupContextMixin
                 appointment.customer = self.object
                 appointment.save()
 
-                # Send calendar invite if checkbox is checked
                 if request.POST.get('send_invite'):
-                    send_appointment_invite(appointment)
+                    send_calendar_invite(request, appointment)
 
                 messages.success(request, "Appointment added successfully!")
                 return redirect('customers-update', pk=self.object.pk)
@@ -460,10 +422,12 @@ def update_appointment_status(request, pk):
 
 def send_appointment_invite_view(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
-    if send_appointment_invite(appointment):
-        messages.success(request, "Calendar invite sent successfully!")
-    else:
-        messages.error(request, "Failed to send calendar invite.")
+
+    customer = appointment.customer
+    user = customer.user
+
+    send_calendar_invite(request, appointment)
+
     return redirect('customers-update', pk=appointment.customer.pk)
 
 
